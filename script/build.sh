@@ -4,7 +4,7 @@ set -e
 PROJ_NAME=sea-server-go
 OUTPUT_DIR=build
 
-# build with verison infos
+# build with version info
 versionDir=github.com/hzxiao/goutil/version
 gitTag=$(if [ "`git describe --tags --abbrev=0 2>/dev/null`" != "" ];then git describe --tags --abbrev=0; else git log --pretty=format:'%h' -n 1; fi)
 buildDate=$(TZ=Asia/Shanghai date +%FT%T%z)

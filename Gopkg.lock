@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/hzxiao/goutil"
   packages = ["version"]
-  revision = "82d67a89f3a57eb3109e2a661cdfe493902ac20d"
+  revision = "9e0e96979b6b9d3e3543d672de33635316e3ddfc"
 
 [[projects]]
   name = "github.com/spf13/pflag"
