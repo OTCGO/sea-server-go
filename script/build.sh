@@ -17,7 +17,7 @@ rm -rf $OUTPUT_DIR
 mkdir -p $OUTPUT_DIR/$PROJ_NAME
 mkdir -p $OUTPUT_DIR/$PROJ_NAME/script
 
-go build -v -ldflags "-w -X ${versionDir}.gitTag=${gitTag} -X ${versionDir}.buildDate=${buildDate} -X ${versionDir}.gitCommit=${gitCommit} -X ${versionDir}.gitTreeState=${gitTreeState}" .
+go build -v -ldflags "-w -X ${versionDir}.gitTag=${gitTag} -X ${versionDir}.buildDate=${buildDate} -X ${versionDir}.gitCommit=${gitCommit} -X ${versionDir}.gitTreeState=${gitTreeState}" -o ${PROJ_NAME}
 cp -R script/* $OUTPUT_DIR/$PROJ_NAME/script
 mv $PROJ_NAME $OUTPUT_DIR/$PROJ_NAME
 cp Makefile $OUTPUT_DIR/$PROJ_NAME
