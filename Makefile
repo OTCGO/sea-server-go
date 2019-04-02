@@ -4,6 +4,9 @@ test:
 build:
 	script/build.sh
 
+install:
+	script/install.sh
+
 fmt:
 	@gofmt -w .
 

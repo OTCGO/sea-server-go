@@ -4,8 +4,18 @@ set -e
 PROJ_NAME=sea-server-go
 OUTPUT_DIR=build
 
-# build with version info
 versionDir=github.com/hzxiao/goutil/version
+PWD=`pwd`
+if [[ ${PWD} = ${GOPATH}/* ]]; then
+    if [[ -d vendor ]]; then
+        gp=${GOPATH//\//\\\/}
+        proj_path=`echo ${PWD} | sed "s/${gp}\/src\///g"`
+        versionDir=${proj_path}/vendor/github.com/hzxiao/goutil/version
+    fi
+fi
+echo "version dir: ${versionDir}"
+
+# build with version info
 gitTag=$(if [ "`git describe --tags --abbrev=0 2>/dev/null`" != "" ];then git describe --tags --abbrev=0; else git log --pretty=format:'%h' -n 1; fi)
 buildDate=$(TZ=Asia/Shanghai date +%FT%T%z)
 gitCommit=$(git log --pretty=format:'%H' -n 1)
