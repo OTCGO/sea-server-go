@@ -23,7 +23,7 @@ func IsRegisterNep5AssetTx(tx goutil.Map) bool {
 
 	if tx.GetString("type") == "InvocationTransaction" &&
 		tx.GetInt64("sys_fee") >= 490 &&
-		strings.HasSuffix(tx.GetString("script"), HexDecode("Neo.Contract.Create")) {
+		strings.HasSuffix(tx.GetString("script"), "68134e656f2e436f6e74726163742e437265617465") {
 			return true
 	}
 	return false

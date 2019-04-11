@@ -1,9 +1,9 @@
 package neo
 
 import (
-	"encoding/binary"
 	"fmt"
 	"github.com/OTCGO/sea-server-go/pkg/neo/opcode"
+	"strconv"
 )
 
 var paramTypes = map[byte]string{
@@ -21,7 +21,7 @@ var paramTypes = map[byte]string{
 }
 
 type ContractInfo struct {
-	Script       []byte
+	Script       string
 	Contract     string
 	ContractName string
 	Version      string
@@ -34,52 +34,171 @@ type ContractInfo struct {
 	Description  string
 }
 
-func (c *ContractInfo) parse() error {
+func (c *ContractInfo) parse() (err error) {
+	c.Description, err = c.parseString()
+	if err != nil {
+		return fmt.Errorf("parse description fail: %v", err)
+	}
+	c.Email, err = c.parseString()
+	if err != nil {
+		return fmt.Errorf("parse email fail: %v", err)
+	}
+	c.Author, err = c.parseString()
+	if err != nil {
+		return fmt.Errorf("parse author fail: %v", err)
+	}
+	c.Version, err = c.parseString()
+	if err != nil {
+		return fmt.Errorf("parse version fail: %v", err)
+	}
+	c.ContractName, err = c.parseString()
+	if err != nil {
+		return fmt.Errorf("parse name fail: %v", err)
+	}
+	err = c.parseStorageDynamic()
+	if err != nil {
+		return err
+	}
+	err = c.parseReturnType()
+	if err != nil {
+		return err
+	}
+	err = c.parseParameter()
+	if err != nil {
+		return err
+	}
+	script, err := c.parseString()
+	if err != nil {
+		return fmt.Errorf("parse contract script fail: %v", err)
+	}
+	c.Contract = ScriptToHash([]byte(script))
+
 	return nil
 }
 
-func (c *ContractInfo) parseStorageDynamic() error {
+func (c *ContractInfo) parseStorageDynamic() (err error) {
+	var elem interface{}
+	elem, c.Script, err = parseScriptElem(c.Script)
+	if err != nil {
+		return fmt.Errorf("parse storage dynamic err: %v", err)
+	}
+	if elem == nil {
+		return fmt.Errorf("parse storage dynamic fail value is nil")
+	}
+	v, ok := elem.(int)
+	if !ok {
+		return fmt.Errorf("wrong type for storage&dynamic %v", elem)
+	}
+
+	c.UseStorage = v&0x01 == 0x01
+	c.DynamicCall = v&0x02 == 0x02
 	return nil
 }
 
-func (c *ContractInfo) parseReturnType() error {
+func (c *ContractInfo) parseReturnType() (err error) {
+	var elem interface{}
+	elem, c.Script, err = parseScriptElem(c.Script)
+	if err != nil {
+		return fmt.Errorf("parse return type err: %v", err)
+	}
+	if elem == nil {
+		return fmt.Errorf("parse return type fail value is nil")
+	}
+
+	str, ok := elem.(string)
+	if ok {
+		mark, err := strconv.ParseInt(ReverseBigLitterEndian(str), 16, 8)
+		if err != nil {
+			return fmt.Errorf("parse return type parse str to int err: %v", err)
+		}
+		c.ReturnType = paramTypes[byte(mark)]
+		return err
+	}
+	iv, ok := elem.(int)
+	if ok {
+		c.ReturnType = paramTypes[byte(iv)]
+	}
+	return
+}
+
+func (c *ContractInfo) parseParameter() (err error) {
+	var elem interface{}
+	elem, c.Script, err = parseScriptElem(c.Script)
+	if err != nil {
+		return fmt.Errorf("parse parameter err: %v", err)
+	}
+	if elem == nil {
+		return fmt.Errorf("parse parameter fail value is nil")
+	}
+
+	str, ok := elem.(string)
+	if !ok {
+		return fmt.Errorf("wrong parameter type: %v", str)
+	}
+
+	for i := 0; i < len(str)-1; i = i + 2 {
+		mark, err := strconv.ParseInt(str[i:i+2], 16, 8)
+		if err != nil {
+			return fmt.Errorf("parse parameter str to int: %v", err)
+		}
+		c.Parameter = append(c.Parameter, paramTypes[byte(mark)])
+	}
 	return nil
 }
 
-func (c *ContractInfo) parseParameter() error {
-	return nil
+func (c *ContractInfo) parseString() (value string, err error) {
+	var elem interface{}
+	elem, c.Script, err = parseScriptElem(c.Script)
+	if err != nil {
+		return "", fmt.Errorf("parse string err: %v", err)
+	}
+	if elem == nil {
+		return "", fmt.Errorf("parse string fail value is nil")
+	}
+
+	str, ok := elem.(string)
+	if !ok {
+		return "", fmt.Errorf("wrong string type: %v", str)
+	}
+
+	return HexDecode(str), nil
 }
 
-func ParseNep5Asset(script []byte) (*ContractInfo, error) {
-	return nil, nil
-}
-
-func parseScriptElem(script []byte) (elem, rest []byte, err error) {
+func parseScriptElem(script string) (elem interface{}, rest string, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = fmt.Errorf("%v", e)
 			return
 		}
 	}()
-	var elemLen int
-	var start = 2
-	mark := script[0]
+	var elemLen int64
+	var start int64 = 2
+	mark := []byte(HexDecode(script))[0]
 	switch {
 	case mark <= opcode.PUSHBYTES75:
-		elemLen = int(mark)
+		elemLen = int64(mark)
 	case mark == opcode.PUSHDATA1:
-		elemLen = int(binary.BigEndian.Uint32(script[start:4]))
+		elemLen, err = strconv.ParseInt(script[start:4], 16, 16)
+		if err != nil {
+			return
+		}
 		start = 4
 	case mark == opcode.PUSHDATA2:
-		elemLen = int(binary.BigEndian.Uint32(script[start:6]))
+		elemLen, err = strconv.ParseInt(ReverseBigLitterEndian(script[start:6]), 16, 32)
+		if err != nil {
+			return
+		}
 		start = 6
 	case mark == opcode.PUSHDATA4:
-		elemLen = int(binary.BigEndian.Uint32(script[start:10]))
+		elemLen, err = strconv.ParseInt(ReverseBigLitterEndian(script[start:10]), 16, 64)
+		if err != nil {
+			return
+		}
 		start = 10
 	case mark == opcode.PUSHM1:
-		elem = []byte{0xff, 0xff, 0xff, 0xff}
+		elem = -1
 	case mark >= opcode.PUSH1 && mark <= opcode.PUSH16:
-		elem = []byte{mark - opcode.PUSH1}
+		elem = int(mark - 0x50)
 	default:
 		return nil, script, nil
 	}
@@ -91,4 +210,8 @@ func parseScriptElem(script []byte) (elem, rest []byte, err error) {
 		rest = script[start+elemLen*2:]
 	}
 	return
+}
+
+func ParseNep5Asset(script []byte) (*ContractInfo, error) {
+	return nil, nil
 }
