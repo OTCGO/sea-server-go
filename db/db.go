@@ -2,6 +2,7 @@ package db
 
 import (
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	"github.com/hzxiao/goutil/log"
 	"time"
@@ -10,6 +11,17 @@ import (
 type DB struct {
 	uri    string
 	engine *xorm.Engine
+}
+
+func (d *DB) init() error {
+	engine, err := xorm.NewEngine("mysql", db.uri)
+	if err != nil {
+		return err
+	}
+
+	engine.SetMapper(core.GonicMapper{})
+	db.engine = engine
+	return nil
 }
 
 func (d *DB) loopPing() {
@@ -34,20 +46,14 @@ func (d *DB) loopPing() {
 }
 
 func (d *DB) reconnect() error {
-	engine, err := xorm.NewEngine("mysql", db.uri)
-	if err != nil {
-		return err
-	}
-
-	d.engine = engine
-	return nil
+	return d.init()
 }
 
 var db *DB
 
 func InitDB(uri string) (err error) {
 	db = &DB{uri: uri}
-	db.engine, err = xorm.NewEngine("mysql", db.uri)
+	err = db.init()
 	if err != nil {
 		return
 	}
@@ -58,3 +64,8 @@ func InitDB(uri string) (err error) {
 	go db.loopPing()
 	return
 }
+
+const (
+	TableStatus = "status"
+	TableBlock  = "block"
+)
