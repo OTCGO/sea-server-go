@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/assert"
 	"testing"
 )
@@ -107,6 +108,9 @@ func TestInsertBlock(t *testing.T) {
 	var err error
 	b1 := &Block{
 		Height: 1,
+		Raw: goutil.Map{
+			"index": 0,
+		},
 	}
 	ok, err := InsertBlock(b1)
 	assert.NoError(t, err)
@@ -124,6 +128,9 @@ func TestGetBlock(t *testing.T) {
 	b1 := &Block{
 		Height: 1,
 		SysFee: 2,
+		Raw: goutil.Map{
+			"index": "0",
+		},
 	}
 	ok, err := InsertBlock(b1)
 	assert.NoError(t, err)
@@ -133,6 +140,7 @@ func TestGetBlock(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, b)
 	assert.Equal(t, b1.SysFee, b.SysFee)
+	assert.Equal(t, goutil.Map{"index": "0"}, b.Raw)
 
 	_, err = GetBlock(0)
 	assert.Error(t, err)

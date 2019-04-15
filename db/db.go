@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
@@ -69,3 +70,20 @@ const (
 	TableStatus = "status"
 	TableBlock  = "block"
 )
+
+func InitStatus(names ...string) error {
+	for _, name := range names {
+		exists, err := db.engine.Exist(&Status{Name: name})
+		if err != nil {
+			return err
+		}
+		if exists {
+			continue
+		}
+		err = InsertStatus(&Status{Name: name, UpdateHeight: 0})
+		if err != nil {
+			return fmt.Errorf("insert status by name(%v) err: %v", err)
+		}
+	}
+	return nil
+}

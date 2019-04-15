@@ -19,7 +19,7 @@ type SyncTask interface {
 }
 
 func Init() error {
-	err := Register()
+	err := Register(&SyncBlock{})
 	if err != nil {
 		return err
 	}
