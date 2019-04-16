@@ -12,7 +12,7 @@ type SyncBlock struct {
 }
 
 func (sb *SyncBlock) Name() string {
-	return "block"
+	return BlockTask
 }
 
 func (sb *SyncBlock) Sync(block goutil.Map) error {

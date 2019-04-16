@@ -22,4 +22,5 @@ func init()  {
 func deleteAll()  {
 	db.engine.Table(TableBlock).Exec("delete from block")
 	db.engine.Table(TableStatus).Exec("delete from status")
+	db.engine.Table(TableAssets).Exec("delete from assets")
 }

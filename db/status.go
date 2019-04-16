@@ -7,7 +7,7 @@ func InsertStatus(status *Status) error {
 		return fmt.Errorf("status is nil")
 	}
 	if status.Name == "" {
-		
+
 		return fmt.Errorf("status.name is empty")
 	}
 
@@ -78,4 +78,23 @@ func GetBlock(height int) (*Block, error) {
 		return nil, fmt.Errorf("not found")
 	}
 	return &block, nil
+}
+
+func InsertAssets(assets *Assets) (bool, error) {
+	if assets == nil {
+		return false, fmt.Errorf("assets is nil")
+	}
+
+	exists, err := db.engine.Exist(&Assets{Asset: assets.Asset})
+	if err != nil {
+		return false, err
+	}
+	if exists {
+		return false, nil
+	}
+	effected, err := db.engine.Insert(assets)
+	if err != nil {
+		return false, err
+	}
+	return effected == 1, nil
 }

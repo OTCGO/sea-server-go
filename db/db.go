@@ -69,6 +69,7 @@ func InitDB(uri string) (err error) {
 const (
 	TableStatus = "status"
 	TableBlock  = "block"
+	TableAssets = "assets"
 )
 
 func InitStatus(names ...string) error {

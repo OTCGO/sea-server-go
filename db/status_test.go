@@ -145,3 +145,20 @@ func TestGetBlock(t *testing.T) {
 	_, err = GetBlock(0)
 	assert.Error(t, err)
 }
+
+func TestInsertAssets(t *testing.T) {
+	deleteAll()
+
+	var err error
+	a1 := &Assets{
+		Asset:    "0xcc",
+		Decimals: 8,
+	}
+	ok, err := InsertAssets(a1)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+
+	ok, err = InsertAssets(a1)
+	assert.NoError(t, err)
+	assert.False(t, ok)
+}

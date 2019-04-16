@@ -7,7 +7,12 @@ import (
 	"time"
 )
 
-const dur = time.Second * 15
+const dur = time.Second * 10
+
+const (
+	BlockTask  = "block"
+	AssetsTask = "assets"
+)
 
 var tasks = map[string]SyncTask{}
 
