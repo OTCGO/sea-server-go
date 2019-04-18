@@ -2,6 +2,7 @@ package neo
 
 import (
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"golang.org/x/crypto/ripemd160"
 )
@@ -82,4 +83,12 @@ func ReverseBigLitterEndian(hexStr string) string {
 func ScriptToHash(unhex []byte) string {
 	sh := Script2ScriptHash(unhex)
 	return ReverseBigLitterEndian(string(HexEncodeBytes(sh)))
+}
+
+func HexToUInt64(hexStr string) uint64 {
+	bs := HexDecodeString(hexStr)
+	for i := len(bs); i < 8; i++ {
+		bs = append(bs, 0)
+	}
+	return binary.LittleEndian.Uint64(bs)
 }

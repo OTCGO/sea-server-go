@@ -212,6 +212,11 @@ func parseScriptElem(script string) (elem interface{}, rest string, err error) {
 	return
 }
 
-func ParseNep5Asset(script []byte) (*ContractInfo, error) {
-	return nil, nil
+func ParseContract(script string) (*ContractInfo, error) {
+	contract := &ContractInfo{Script: script}
+	err := contract.parse()
+	if err != nil {
+		return nil, err
+	}
+	return contract, nil
 }
