@@ -25,3 +25,33 @@ type Assets struct {
 	Decimals     int    `json:"decimals,omitempty"`
 	ContractName string `json:"contractName,omitempty"`
 }
+
+type Utxos struct {
+	ID          int
+	Txid        string
+	IndexN      int
+	Address     string
+	Value       string
+	Asset       string
+	Height      int
+	SpentTxid   string
+	SpentHeight int
+	ClaimTxid   string
+	ClaimHeight int
+	Static      int
+}
+
+type Upt struct {
+	ID           int
+	Address      string
+	Asset        string
+	UpdateHeight int
+}
+
+type Balance struct {
+	ID                int
+	Address           string
+	Asset             string
+	Value             string
+	LastUpdatedHeight int
+}

@@ -12,6 +12,7 @@ const dur = time.Second * 10
 const (
 	BlockTask  = "block"
 	AssetsTask = "assets"
+	UtxoTask   = "utxo"
 )
 
 var tasks = map[string]SyncTask{}

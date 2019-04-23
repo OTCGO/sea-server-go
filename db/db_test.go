@@ -1,6 +1,6 @@
 package db
 
-func init()  {
+func init() {
 	err := InitDB("root:123456@/mysql?charset=utf8&loc=Local&parseTime=true")
 	if err != nil {
 		panic(err)
@@ -19,8 +19,11 @@ func init()  {
 	db.engine.ShowSQL(true)
 }
 
-func deleteAll()  {
+func deleteAll() {
 	db.engine.Table(TableBlock).Exec("delete from block")
 	db.engine.Table(TableStatus).Exec("delete from status")
 	db.engine.Table(TableAssets).Exec("delete from assets")
+	db.engine.Table(TableUpt).Exec("delete from upt")
+	db.engine.Table(TableUtxos).Exec("delete from utxos")
+	db.engine.Table(TableBalance).Exec("delete from balance")
 }

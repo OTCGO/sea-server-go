@@ -50,6 +50,26 @@ func (d *DB) reconnect() error {
 	return d.init()
 }
 
+func (d *DB) Insert(obj interface{}) (int64, error) {
+	return d.engine.Insert(obj)
+}
+
+func (d *DB) InsertOrIgnore(obj, ignore interface{}) (bool, error) {
+	exists, err := db.engine.Exist(ignore)
+	if err != nil {
+		return false, err
+	}
+	if exists {
+		return false, nil
+	}
+
+	effected, err := db.engine.Insert(&obj)
+	if err != nil {
+		return false, err
+	}
+	return effected == 1, nil
+}
+
 var db *DB
 
 func InitDB(uri string) (err error) {
@@ -67,9 +87,12 @@ func InitDB(uri string) (err error) {
 }
 
 const (
-	TableStatus = "status"
-	TableBlock  = "block"
-	TableAssets = "assets"
+	TableStatus  = "status"
+	TableBlock   = "block"
+	TableAssets  = "assets"
+	TableUtxos   = "utxos"
+	TableUpt     = "upt"
+	TableBalance = "balance"
 )
 
 func InitStatus(names ...string) error {
