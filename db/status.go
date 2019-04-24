@@ -98,3 +98,15 @@ func InsertAssets(assets *Assets) (bool, error) {
 	}
 	return effected == 1, nil
 }
+
+func GetAsset(asset string) (*Assets, error) {
+	var a Assets
+	ok, err := db.engine.Where("asset = ?", asset).Get(&a)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, fmt.Errorf("not found")
+	}
+	return &a, nil
+}

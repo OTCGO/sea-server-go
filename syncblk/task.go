@@ -10,9 +10,10 @@ import (
 const dur = time.Second * 10
 
 const (
-	BlockTask  = "block"
-	AssetsTask = "assets"
-	UtxoTask   = "utxo"
+	BlockTask   = "block"
+	AssetsTask  = "assets"
+	UtxoTask    = "utxo"
+	BalanceTask = "upt"
 )
 
 var tasks = map[string]SyncTask{}

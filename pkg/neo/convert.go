@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"golang.org/x/crypto/ripemd160"
+	"math"
+	"math/big"
 )
 
 func Hash256(str string) []byte {
@@ -91,4 +93,21 @@ func HexToUInt64(hexStr string) uint64 {
 		bs = append(bs, 0)
 	}
 	return binary.LittleEndian.Uint64(bs)
+}
+
+func Address2ScriptHash(address string) ([]byte, error) {
+	_, data, err := Base58CheckDecode(address)
+	if err != nil {
+		return nil, err
+	}
+	return HexEncodeBytes(data), nil
+}
+
+func FormatBigFloat(num string, base int, decimals int) (string, error) {
+	f, _, err := new(big.Float).Parse(num, base)
+	if err != nil {
+		return "", nil
+	}
+	value := new(big.Float).Quo(f, big.NewFloat(math.Pow10(decimals)))
+	return value.Text('f', -1), nil
 }

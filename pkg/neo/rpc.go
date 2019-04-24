@@ -9,6 +9,7 @@ const (
 	MethodGetBlock          = "getblock"
 	MethodInvokeFunction    = "invokefunction"
 	MethodGetRawTransaction = "getrawtransaction"
+	MethodGetAccountState   = "getaccountstate"
 )
 
 var NeoURI = func() string {

@@ -22,6 +22,7 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 
 	height := int(block.GetInt64("index")) + 1
 
+	var addressInfo = map[string]struct{}{}
 	for _, tx := range block.GetMapArray("tx") {
 		txid := tx.GetString("txid")
 		//vin
@@ -37,6 +38,7 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 				log.Error("[SyncUtxo] update vin by txid(%v) height(%v) err: %v", txid, height, err)
 				return fmt.Errorf("update vin fail(%v)", err)
 			}
+			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
 		}
 		//vout
 		for _, vout := range tx.GetMapArray("vout") {
@@ -53,6 +55,7 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 				log.Error("[SyncUtxo] insert vout by txid(%v) height(%v) err: %v", txid, height, err)
 				return fmt.Errorf("insert vout fail(%v)", err)
 			}
+			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
 		}
 		//claim
 		for _, claim := range tx.GetMapArray("claim") {
@@ -67,6 +70,15 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 				log.Error("[SyncUtxo] update claim by txid(%v) height(%v) err: %v", txid, height, err)
 				return fmt.Errorf("update claim fail(%v)", err)
 			}
+		}
+	}
+	for k := range addressInfo {
+		infos := strings.Split(k, "-")
+		upt := &db.Upt{Address: infos[0], Asset: infos[1], UpdateHeight: height}
+		_, err = db.InsertOrUpdateUpt(upt)
+		if err != nil {
+			log.Error("[SyncUtxo] update upt by height(%v) err: %v", height, err)
+			return fmt.Errorf("update claim fail(%v)", err)
 		}
 	}
 	err = db.MustUpdateStatus(db.Status{Name: sa.Name(), UpdateHeight: height})

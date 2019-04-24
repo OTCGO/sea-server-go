@@ -67,6 +67,15 @@ func InsertOrUpdateUpt(upt *Upt) (bool, error) {
 	return effected > 0, nil
 }
 
+func ListUptByHeight(height int) ([]*Upt, error) {
+	var upts []*Upt
+	err := db.engine.Where("update_height = ?", height).Find(&upts)
+	if err != nil {
+		return nil, err
+	}
+	return upts, nil
+}
+
 func InsertOrUpdateBalance(b *Balance) (bool, error) {
 	if b == nil {
 		return false, fmt.Errorf("balance is nil")
