@@ -105,29 +105,29 @@ func rpcGetNep5Balance(contract, address string) (balance string, err error) {
 			},
 		},
 	}
-	var result goutil.Map
-	err = neo.Rpc(neo.MethodInvokeFunction, params, &result)
+	v, success, err := rpcInvoke(params)
 	if err != nil {
 		return
 	}
-	if !strings.HasPrefix(result.GetString("state"), "HALT") {
-		return "", fmt.Errorf("rpc invoke fun fail")
+	if !success {
+		err = fmt.Errorf("rpc invoke func fail")
+		return
 	}
 
 	asset, err := db.GetAsset(contract)
 	if err != nil {
 		return "", fmt.Errorf("get asset(%v) from db err: %v", contract, err)
 	}
-	value := result.GetStringP("stack/0/value")
+	value := v.GetString("value")
 	var base int
-	switch result.GetStringP("stack/0/type") {
+	switch v.GetString("type") {
 	case "ByteArray":
 		value = neo.ReverseBigLitterEndian(value)
 		base = 16
 	case "Integer":
 		base = 10
 	default:
-		return "", fmt.Errorf("unkown value type(%v)", result.GetStringP("stack/0/type"))
+		return "", fmt.Errorf("unkown value type(%v)", v.GetString("type"))
 	}
 
 	balance, err = neo.FormatBigFloat(value, base, asset.Decimals)

@@ -105,7 +105,7 @@ func parseNep5Asset(tx goutil.Map) (*db.Assets, error) {
 		if !success {
 			return nil, nil
 		}
-		result[f] = v
+		result[f] = v.GetString("value")
 	}
 	var asset = &db.Assets{
 		Type:         "NEP5",
@@ -128,7 +128,7 @@ func parseNep5Asset(tx goutil.Map) (*db.Assets, error) {
 	return asset, nil
 }
 
-func rpcInvoke(params interface{}) (string, bool, error) {
+func rpcInvoke(params interface{}) (goutil.Map, bool, error) {
 	var invokeFail = func(r goutil.Map) bool {
 		if r == nil {
 			return false
@@ -139,11 +139,11 @@ func rpcInvoke(params interface{}) (string, bool, error) {
 	var result = goutil.Map{}
 	err := neo.Rpc(neo.MethodInvokeFunction, params, &result)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 	if invokeFail(result) {
-		return "", false, nil
+		return nil, false, nil
 	}
 
-	return result.GetStringP("stack/0/value"), true, nil
+	return result.GetMapP("stack/0"), true, nil
 }
