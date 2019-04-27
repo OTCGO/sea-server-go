@@ -26,4 +26,5 @@ func deleteAll() {
 	db.engine.Table(TableUpt).Exec("delete from upt")
 	db.engine.Table(TableUtxos).Exec("delete from utxos")
 	db.engine.Table(TableBalance).Exec("delete from balance")
+	db.engine.Table(TableHistory).Exec("delete from history")
 }

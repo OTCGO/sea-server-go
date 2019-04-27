@@ -63,7 +63,7 @@ func (d *DB) InsertOrIgnore(obj, ignore interface{}) (bool, error) {
 		return false, nil
 	}
 
-	effected, err := db.engine.Insert(&obj)
+	effected, err := db.engine.Insert(obj)
 	if err != nil {
 		return false, err
 	}
@@ -93,6 +93,7 @@ const (
 	TableUtxos   = "utxos"
 	TableUpt     = "upt"
 	TableBalance = "balance"
+	TableHistory = "history"
 )
 
 func InitStatus(names ...string) error {

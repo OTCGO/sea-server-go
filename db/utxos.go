@@ -92,3 +92,15 @@ func InsertOrUpdateBalance(b *Balance) (bool, error) {
 	}
 	return effected > 0, nil
 }
+
+func InsertOrIgnoreHistory(h *History) (bool, error) {
+	if h == nil {
+		return false, fmt.Errorf("history is nil")
+	}
+
+	return db.InsertOrIgnore(h, &History{
+		Txid:      h.Txid,
+		Operation: h.Operation,
+		IndexN:    h.IndexN,
+	})
+}

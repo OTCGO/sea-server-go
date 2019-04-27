@@ -55,3 +55,14 @@ type Balance struct {
 	Value             string
 	LastUpdatedHeight int
 }
+
+type History struct {
+	ID        int
+	Txid      string
+	Operation string
+	IndexN    int
+	Address   string
+	Value     string
+	Asset     string
+	Timepoint int
+}

@@ -36,3 +36,26 @@ func TestInsertOrUpdateBalance(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, ok)
 }
+
+func TestInsertOrIgnoreHistory(t *testing.T) {
+	deleteAll()
+
+	h := &History{
+		Txid:      "123",
+		Operation: "in",
+		IndexN:    0,
+		Address:   "1234",
+	}
+	ok, err := InsertOrIgnoreHistory(h)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+
+	ok, err = InsertOrIgnoreHistory(h)
+	assert.NoError(t, err)
+	assert.False(t, ok)
+
+	h.Operation = "out"
+	ok, err = InsertOrIgnoreHistory(h)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+}
