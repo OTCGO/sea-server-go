@@ -1,0 +1,10 @@
+
+net = "testnet"
+
+mysqlUrl = "root:123456@/sea_test?charset=utf8&loc=Local&parseTime=true"
+
+seeds = [
+    "https://test3.cityofzion.io:443"
+]
+
+NeoUrl = "https://test3.cityofzion.io:443"
