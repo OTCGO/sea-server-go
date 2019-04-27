@@ -171,3 +171,41 @@ func Send(uri string, r *JRpcRequest, result interface{}) error {
 
 	return jRpcResp.UnmarshalResult(&result)
 }
+
+func SendTimeout(uri string, r *JRpcRequest, timeout time.Duration, result interface{}) error {
+	if r == nil {
+		return errors.New("doJsonRpc: json-rpc request is nil")
+	}
+
+	reqData, err := r.MarshalJSON()
+	if err != nil {
+		return fmt.Errorf("doJsonRpc: marshal request err(%v)", err)
+	}
+
+	req, err := http.NewRequest("POST", uri, bytes.NewReader(reqData))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	c := &http.Client{
+		Timeout: timeout,
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return fmt.Errorf("doJsonRpc: send http request err(%v)", err)
+	}
+
+	respData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("doJsonRpc: read http response err(%v)", err)
+	}
+	defer resp.Body.Close()
+	jRpcResp := &JRpcResponse{}
+	err = jRpcResp.UnmarshalJSON(respData)
+	if err != nil {
+		return fmt.Errorf("doJsonRpc: unmarshal json-rpc reponse err(%v)", err)
+	}
+
+	return jRpcResp.UnmarshalResult(&result)
+}
