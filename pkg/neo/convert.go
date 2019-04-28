@@ -4,10 +4,13 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"golang.org/x/crypto/ripemd160"
 	"math"
 	"math/big"
 )
+
+const NEO_ADDRESS_VERSION  = 0x17
 
 func Hash256(str string) []byte {
 	s := sha256.New()
@@ -101,6 +104,16 @@ func Address2ScriptHash(address string) ([]byte, error) {
 		return nil, err
 	}
 	return HexEncodeBytes(data), nil
+}
+
+func ScriptHash2Address(scriptHash []byte) (string, error) {
+	length := len(scriptHash)
+	if length != 20 {
+		return "", fmt.Errorf("invalid scriptHash")
+	}
+
+	address := Base58CheckEncode(NEO_ADDRESS_VERSION, scriptHash)
+	return address, nil
 }
 
 func FormatBigFloat(num string, base int, decimals int) (string, error) {

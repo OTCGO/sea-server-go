@@ -12,6 +12,12 @@ func TestAddress2ScriptHash(t *testing.T) {
 	assert.Equal(t, "05a0a304bac8edf51064a9165670cb39fb87439e", string(hash))
 }
 
+func TestScriptHash2Address(t *testing.T) {
+	address, err := ScriptHash2Address(HexDecodeString("05a0a304bac8edf51064a9165670cb39fb87439e"))
+	assert.NoError(t, err)
+	assert.Equal(t, "AGHdThQFJs5kixWuXkgRsbNKz2LrDYDaQB", address)
+}
+
 func TestFormatBigFloat(t *testing.T) {
 	v1, err := FormatBigFloat("100000000", 10, 8)
 	assert.NoError(t, err)
