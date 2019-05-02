@@ -110,3 +110,15 @@ func GetAsset(asset string) (*Assets, error) {
 	}
 	return &a, nil
 }
+
+func GetAssetDecimals(asset string) (int, error) {
+	var a Assets
+	ok, err := db.engine.Where("asset = ?", asset).Get(&a)
+	if err != nil {
+		return 0, err
+	}
+	if !ok {
+		return 0, fmt.Errorf("not found")
+	}
+	return a.Decimals, nil
+}

@@ -14,9 +14,12 @@ const (
 	AssetsTask  = "assets"
 	UtxoTask    = "utxo"
 	BalanceTask = "upt"
+	HistoryTask = "history"
 )
 
-var tasks = map[string]SyncTask{}
+var (
+	tasks = map[string]SyncTask{}
+)
 
 type SyncTask interface {
 	Name() string
