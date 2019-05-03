@@ -66,7 +66,7 @@ func (sb *SyncBlock) BlockHeight() (int, int, error) {
 	}
 
 	var latestHeight int
-	err = neo.Rpc(neo.MethodGetBlockCount, []interface{}{}, &latestHeight)
+	err = neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetBlockCount, []interface{}{}, &latestHeight)
 	if err != nil {
 		log.Error("[SyncBlock] rpc get block count err: %v", err)
 		return 0, 0, fmt.Errorf("rpc get block count fail(%v)", err)
@@ -76,7 +76,7 @@ func (sb *SyncBlock) BlockHeight() (int, int, error) {
 
 func (sb *SyncBlock) Block(height int) (goutil.Map, error) {
 	var block goutil.Map
-	err := neo.Rpc(neo.MethodGetBlock, []int{height - 1, 1}, &block)
+	err := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetBlock, []int{height - 1, 1}, &block)
 	if err != nil {
 		return nil, err
 	}

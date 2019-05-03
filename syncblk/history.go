@@ -80,7 +80,7 @@ func (sa *SyncHistory) Sync(block goutil.Map) error {
 			value := utxo.GetString("value")
 			_, ok := utxoM[key]
 			if ok {
-				value, _ = neo.AddBigFloat(value, utxoM.GetStringP(key+"/value"))
+				value, _ = bigfloalt.Add(value, utxoM.GetStringP(key+"/value"))
 			}
 			utxo.Set("value", value)
 			utxoM.Set(key, utxo)
@@ -189,7 +189,7 @@ func rpcUtxoByTxids(txids []string) (goutil.Map, error) {
 		go func(tid string) {
 			g.Go(func() error {
 				var result goutil.Map
-				rpcErr := neo.Rpc(neo.MethodGetRawTransaction, []interface{}{tid, 1}, &result)
+				rpcErr := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetRawTransaction, []interface{}{tid, 1}, &result)
 				if rpcErr != nil {
 					return rpcErr
 				}
@@ -219,7 +219,7 @@ func rpcLogByTxids(txids []string) (goutil.Map, error) {
 		go func(tid string) {
 			g.Go(func() error {
 				var result goutil.Map
-				rpcErr := neo.Rpc(neo.MethodGetApplicationLog, []interface{}{tid}, &result)
+				rpcErr := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetApplicationLog, []interface{}{tid}, &result)
 				if rpcErr != nil {
 					return rpcErr
 				}

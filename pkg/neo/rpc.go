@@ -14,11 +14,7 @@ const (
 	MethodGetApplicationLog = "getapplicationlog"
 )
 
-var NeoURI = func() string {
-	panic("neo uri isn't be initialized")
-}
-
-func Rpc(method string, params interface{}, result interface{}) error {
+func Rpc(url, method string, params interface{}, result interface{}) error {
 	r := &jsonrpc2.JRpcRequest{
 		ID:     1,
 		Method: method,
@@ -28,7 +24,7 @@ func Rpc(method string, params interface{}, result interface{}) error {
 		return err
 	}
 
-	return jsonrpc2.Send(NeoURI(), r, &result)
+	return jsonrpc2.Send(url, r, &result)
 }
 
 func RpcTimeout(url string, method string, params interface{}, timeout time.Duration, result interface{}) error {

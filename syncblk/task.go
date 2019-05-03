@@ -2,6 +2,7 @@ package syncblk
 
 import (
 	"fmt"
+	"github.com/OTCGO/sea-server-go/syncblk/supernode"
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/log"
 	"time"
@@ -19,6 +20,7 @@ const (
 
 var (
 	tasks = map[string]SyncTask{}
+	superNode  *supernode.NodeInfo
 )
 
 type SyncTask interface {
@@ -33,6 +35,7 @@ func Init() error {
 	if err != nil {
 		return err
 	}
+	superNode = supernode.SuperNode
 	return nil
 }
 

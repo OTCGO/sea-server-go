@@ -139,7 +139,7 @@ func rpcGetNep5Balance(contract, address string) (balance string, err error) {
 
 func rpcGetGlobalBalance(asset, address string) (balance string, err error) {
 	var result goutil.Map
-	err = neo.Rpc(neo.MethodGetAccountState, []string{address}, &result)
+	err = neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetAccountState, []string{address}, &result)
 	if err != nil {
 		return
 	}

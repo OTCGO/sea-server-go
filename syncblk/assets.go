@@ -137,7 +137,7 @@ func rpcInvoke(params interface{}) (goutil.Map, bool, error) {
 	}
 
 	var result = goutil.Map{}
-	err := neo.Rpc(neo.MethodInvokeFunction, params, &result)
+	err := neo.Rpc(superNode.FastestNode.Value(), neo.MethodInvokeFunction, params, &result)
 	if err != nil {
 		return nil, false, err
 	}
