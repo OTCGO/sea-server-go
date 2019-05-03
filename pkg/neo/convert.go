@@ -6,8 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"golang.org/x/crypto/ripemd160"
-	"math"
-	"math/big"
 )
 
 const NEO_ADDRESS_VERSION  = 0x17
@@ -114,13 +112,4 @@ func ScriptHash2Address(scriptHash []byte) (string, error) {
 
 	address := Base58CheckEncode(NEO_ADDRESS_VERSION, scriptHash)
 	return address, nil
-}
-
-func FormatBigFloat(num string, base int, decimals int) (string, error) {
-	f, _, err := new(big.Float).Parse(num, base)
-	if err != nil {
-		return "", nil
-	}
-	value := new(big.Float).Quo(f, big.NewFloat(math.Pow10(decimals)))
-	return value.Text('f', -1), nil
 }

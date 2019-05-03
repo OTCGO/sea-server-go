@@ -3,6 +3,7 @@ package syncblk
 import (
 	"fmt"
 	"github.com/OTCGO/sea-server-go/db"
+	"github.com/OTCGO/sea-server-go/pkg/bigfloalt"
 	"github.com/OTCGO/sea-server-go/pkg/neo"
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/log"
@@ -130,7 +131,7 @@ func rpcGetNep5Balance(contract, address string) (balance string, err error) {
 		return "", fmt.Errorf("unkown value type(%v)", v.GetString("type"))
 	}
 
-	balance, err = neo.FormatBigFloat(value, base, asset.Decimals)
+	balance, err = bigfloalt.Format(value, base, asset.Decimals)
 	if err != nil {
 		return
 	}

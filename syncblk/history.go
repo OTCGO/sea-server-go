@@ -266,9 +266,9 @@ func parseNep5History(appLog goutil.Map, txid string, blockTime int) ([]*db.Hist
 		}
 		var value string
 		if noti.GetStringP("state/value/3/type") == "Integer" {
-			value, err = neo.FormatBigFloat(noti.GetStringP("state/value/3/value"), 10, decimals)
+			value, err = bigfloalt.Format(noti.GetStringP("state/value/3/value"), 10, decimals)
 		} else {
-			value, err = neo.FormatBigFloat(noti.GetStringP("state/value/3/value"), 16, decimals)
+			value, err = bigfloalt.Format(noti.GetStringP("state/value/3/value"), 16, decimals)
 		}
 		if err != nil {
 			return nil, err
