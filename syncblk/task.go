@@ -31,7 +31,7 @@ type SyncTask interface {
 }
 
 func Init() error {
-	err := Register(&SyncBlock{})
+	err := Register(&SyncBlock{}, &SyncAssets{}, &SyncUtxo{}, &SyncBalance{}, &SyncHistory{})
 	if err != nil {
 		return err
 	}

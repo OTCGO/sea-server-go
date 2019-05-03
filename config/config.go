@@ -11,6 +11,10 @@ type Config struct {
 	MySQLUrl string
 	Seeds    []string
 	NeoUrl   string
+	Log      struct {
+		OutputWay string
+		Output    string
+	}
 }
 
 func Init(cfgName string) (err error) {
