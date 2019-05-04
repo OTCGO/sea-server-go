@@ -1,6 +1,6 @@
 # sea-server-go/Dockerfile
 
-FROM golang:alpine as builder
+FROM kiang/sea-server-go-builder as builder
 
 RUN apk --no-cache add git
 
