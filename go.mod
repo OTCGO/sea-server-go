@@ -14,7 +14,6 @@ require (
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/hzxiao/goutil v0.0.0-20190502141334-a523988dbf05
 	github.com/lib/pq v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.3
 	golang.org/x/crypto v0.0.0-20190428033426-a29dc8fdc734
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/appengine v1.5.0 // indirect

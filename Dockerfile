@@ -2,6 +2,11 @@
 
 FROM kiang/sea-server-go-builder as builder
 
+RUN apk add --no-cache tzdata
+
+ENV TimeZone=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TimeZone /etc/localtime && echo $TimeZone > /etc/timezone
+
 RUN apk --no-cache add git
 
 WORKDIR /app/sea-server-go
