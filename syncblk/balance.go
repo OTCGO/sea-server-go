@@ -7,6 +7,7 @@ import (
 	"github.com/OTCGO/sea-server-go/pkg/neo"
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/log"
+	"math"
 	"strings"
 )
 
@@ -57,12 +58,20 @@ func (sa *SyncBalance) BlockHeight() (int, int, error) {
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
 	}
 
-	blockStatus, err := db.GetStatus(UtxoTask)
+	assetStatus, err := db.GetStatus(AssetsTask)
+	if err != nil {
+		log.Error("[SyncBalance] get asset status err: %v", err)
+		return 0, 0, fmt.Errorf("get asset status fail(%v)", err)
+	}
+
+	utxoStatus, err := db.GetStatus(UtxoTask)
 	if err != nil {
 		log.Error("[SyncBalance] get utxo status err: %v", err)
 		return 0, 0, fmt.Errorf("get utxo status fail(%v)", err)
 	}
-	return status.UpdateHeight, blockStatus.UpdateHeight, nil
+
+	min := math.Min(float64(assetStatus.UpdateHeight), float64(utxoStatus.UpdateHeight))
+	return status.UpdateHeight, int(min), nil
 }
 
 func (sa *SyncBalance) Block(height int) (goutil.Map, error) {

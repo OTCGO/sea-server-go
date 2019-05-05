@@ -163,12 +163,12 @@ func (sa *SyncHistory) BlockHeight() (int, int, error) {
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
 	}
 
-	blockStatus, err := db.GetStatus(AssetsTask)
+	assetStatus, err := db.GetStatus(AssetsTask)
 	if err != nil {
-		log.Error("[SyncHistory] get block status err: %v", err)
-		return 0, 0, fmt.Errorf("get block status fail(%v)", err)
+		log.Error("[SyncHistory] get asset status err: %v", err)
+		return 0, 0, fmt.Errorf("get asset status fail(%v)", err)
 	}
-	return status.UpdateHeight, blockStatus.UpdateHeight, nil
+	return status.UpdateHeight, assetStatus.UpdateHeight, nil
 }
 
 func (sa *SyncHistory) Block(height int) (goutil.Map, error) {

@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-const dur = time.Second * 10
+const dur = time.Second * 5
 
 const (
 	BlockTask   = "block"
 	AssetsTask  = "assets"
 	UtxoTask    = "utxo"
-	BalanceTask = "upt"
+	BalanceTask = "balance"
 	HistoryTask = "history"
 )
 
@@ -57,6 +57,11 @@ func SyncAll() {
 }
 
 func runTask(task SyncTask) {
+	defer func() {
+		if e := recover(); e != nil {
+			log.Error("[Sync] task(%v) panic by err: %v", e)
+		}
+	}()
 	log.Info("[Sync] task(%v) start run", task.Name())
 	ticker := time.NewTicker(dur)
 	defer ticker.Stop()
@@ -67,6 +72,11 @@ func runTask(task SyncTask) {
 		saveHeight, latestHeight, err = task.BlockHeight()
 		if err != nil {
 			log.Error("[Sync] task(%v) get block height err: %v", task.Name(), err)
+		}
+
+		if saveHeight == latestHeight {
+			<-ticker.C
+			continue
 		}
 
 		var h = saveHeight + 1
@@ -84,6 +94,5 @@ func runTask(task SyncTask) {
 			log.Info("[Sync] task(%v) do sync success at height(%v)", h)
 			h++
 		}
-		<-ticker.C
 	}
 }

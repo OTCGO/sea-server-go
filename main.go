@@ -70,7 +70,8 @@ func initTaskAndServer() (err error) {
 	if err != nil {
 		return
 	}
-	err = db.InitStatus()
+	err = db.InitStatus(syncblk.BlockTask, syncblk.AssetsTask,
+		syncblk.UtxoTask, syncblk.BalanceTask, syncblk.HistoryTask)
 	if err != nil {
 		return
 	}
