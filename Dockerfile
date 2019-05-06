@@ -2,13 +2,6 @@
 
 FROM kiang/sea-server-go-builder as builder
 
-RUN apk add --no-cache tzdata
-
-ENV TimeZone=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TimeZone /etc/localtime && echo $TimeZone > /etc/timezone
-
-RUN apk --no-cache add git
-
 WORKDIR /app/sea-server-go
 
 # Copy the current code into our workdir
@@ -22,6 +15,11 @@ FROM alpine:latest
 
 # Security related package, good to have.
 RUN apk --no-cache add ca-certificates
+
+RUN apk add --no-cache tzdata
+
+ENV TimeZone=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TimeZone /etc/localtime && echo $TimeZone > /etc/timezone
 
 # Same as before, create a directory for our app.
 RUN mkdir /app
