@@ -83,7 +83,7 @@ func (sa *SyncAssets) Block(height int) (goutil.Map, error) {
 
 func parseGlobalAsset(tx goutil.Map) *db.Assets {
 	return &db.Assets{
-		Asset:    strings.TrimLeft(tx.GetString("txid"), "0x"),
+		Asset:    strings.TrimPrefix(tx.GetString("txid"), "0x"),
 		Type:     tx.GetStringP("asset/type"),
 		Name:     tx.GetStringP("asset/name/0/name"),
 		Decimals: int(tx.GetInt64P("asset/precision")),

@@ -30,7 +30,7 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 			uxto := &db.Utxos{
 				Txid:    txid,
 				IndexN:  int(vout.GetInt64("n")),
-				Asset:   strings.TrimLeft(vout.GetString("asset"), "0x"),
+				Asset:   strings.TrimPrefix(vout.GetString("asset"), "0x"),
 				Value:   vout.GetString("value"),
 				Address: vout.GetString("address"),
 				Height:  height,
