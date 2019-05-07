@@ -1,5 +1,5 @@
 SET SESSION default_storage_engine = InnoDB;
-CREATE DATABASE IF NOT EXISTS sea_test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE IF NOT EXISTS sea_test DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE sea_test;
 
 CREATE TABLE IF NOT EXISTS assets (

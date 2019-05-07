@@ -35,3 +35,23 @@ func TestFormatAppLog(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, "2", appLog3["key"])
 }
+
+func TestSyncHistory_Sync(t *testing.T) {
+	initSuperNode()
+
+	block, err := new(SyncBlock).Block(75)
+	assert.NoError(t, err)
+
+	err = new(SyncHistory).Sync(block)
+	assert.NoError(t, err)
+}
+
+func TestSyncUtxo_Sync(t *testing.T) {
+	initSuperNode()
+
+	block, err := new(SyncBlock).Block(82)
+	assert.NoError(t, err)
+
+	err = new(SyncUtxo).Sync(block)
+	assert.NoError(t, err)
+}

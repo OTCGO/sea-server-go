@@ -25,6 +25,24 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 	var addressInfo = map[string]struct{}{}
 	for _, tx := range block.GetMapArray("tx") {
 		txid := tx.GetString("txid")
+		//vout
+		for _, vout := range tx.GetMapArray("vout") {
+			uxto := &db.Utxos{
+				Txid:    txid,
+				IndexN:  int(vout.GetInt64("n")),
+				Asset:   strings.TrimLeft(vout.GetString("asset"), "0x"),
+				Value:   vout.GetString("value"),
+				Address: vout.GetString("address"),
+				Height:  height,
+				Status:  1,
+			}
+			_, err = db.InsertUtxo(uxto)
+			if err != nil {
+				log.Error("[SyncUtxo] insert vout by txid(%v) height(%v) err: %v", txid, height, err)
+				return fmt.Errorf("insert vout fail(%v)", err)
+			}
+			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
+		}
 		//vin
 		for _, vin := range tx.GetMapArray("vin") {
 			uxto := &db.Utxos{
@@ -40,23 +58,7 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 			}
 			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
 		}
-		//vout
-		for _, vout := range tx.GetMapArray("vout") {
-			uxto := &db.Utxos{
-				Txid:    txid,
-				IndexN:  int(vout.GetInt64("n")),
-				Asset:   strings.TrimLeft(vout.GetString("asset"), "0x"),
-				Value:   vout.GetString("value"),
-				Address: vout.GetString("address"),
-				Height:  height,
-			}
-			_, err = db.InsertUtxo(uxto)
-			if err != nil {
-				log.Error("[SyncUtxo] insert vout by txid(%v) height(%v) err: %v", txid, height, err)
-				return fmt.Errorf("insert vout fail(%v)", err)
-			}
-			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
-		}
+
 		//claim
 		for _, claim := range tx.GetMapArray("claim") {
 			uxto := &db.Utxos{

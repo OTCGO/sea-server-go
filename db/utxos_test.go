@@ -59,3 +59,27 @@ func TestInsertOrIgnoreHistory(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, ok)
 }
+
+func TestUpdateUtxoVinAndRet(t *testing.T) {
+	deleteAll()
+
+	utxo := &Utxos{
+		Txid:    "1",
+		IndexN:  0,
+		Asset:   "1",
+		Address: "1",
+	}
+	_, err := InsertUtxo(utxo)
+	assert.NoError(t, err)
+
+	vin := &Utxos{
+		SpentTxid:   "2",
+		SpentHeight: 2,
+		Txid:        utxo.Txid,
+		IndexN:      0,
+	}
+	err = UpdateUtxoVinAndRet(vin)
+	assert.NoError(t, err)
+
+	assert.Equal(t, utxo.Address, vin.Address)
+}

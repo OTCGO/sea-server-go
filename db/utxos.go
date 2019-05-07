@@ -33,7 +33,9 @@ func UpdateUtxoVinAndRet(t *Utxos) error {
 		return err
 	}
 
-	_, err = db.engine.Where("txid = ? AND index_n = ?", t.Txid, t.IndexN).Get(t)
+	var u Utxos
+	_, err = db.engine.Table(TableUtxos).Where("txid = ? AND index_n = ?", t.Txid, t.IndexN).Get(&u)
+	*t = u
 
 	return err
 }

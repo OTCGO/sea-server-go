@@ -38,7 +38,7 @@ type Utxos struct {
 	SpentHeight int
 	ClaimTxid   string
 	ClaimHeight int
-	Static      int
+	Status      int
 }
 
 type Upt struct {

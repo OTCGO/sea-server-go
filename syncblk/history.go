@@ -7,10 +7,8 @@ import (
 	"github.com/OTCGO/sea-server-go/pkg/neo"
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/log"
-	"golang.org/x/sync/errgroup"
 	"sort"
 	"strings"
-	"sync"
 )
 
 type SyncHistory struct {
@@ -73,7 +71,7 @@ func (sa *SyncHistory) Sync(block goutil.Map) error {
 		for _, vin := range tx.GetMapArray("vin") {
 			utxo := utxoMap.GetMapP(fmt.Sprintf("%v/%v", vin.GetString("txid"), vin.GetInt64("vout")))
 			if utxo == nil {
-				log.Error("[SyncHistory] lack of utxo(%v, %v)", vin.GetString("txid"), vin.GetInt64("vout"), err)
+				log.Error("[SyncHistory] lack of utxo(%v, %v)", vin.GetString("txid"), vin.GetInt64("vout"))
 				return fmt.Errorf("lack of utxo")
 			}
 			key := utxo.GetString("asset")+"_"+utxo.GetString("address")
@@ -181,61 +179,29 @@ func (sa *SyncHistory) Block(height int) (goutil.Map, error) {
 
 func rpcUtxoByTxids(txids []string) (goutil.Map, error) {
 	txids = goutil.RemoveDupString(txids)
-	var (
-		g       errgroup.Group
-		voutMap = &sync.Map{}
-	)
-	for _, txid := range txids {
-		go func(tid string) {
-			g.Go(func() error {
-				var result goutil.Map
-				rpcErr := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetRawTransaction, []interface{}{tid, 1}, &result)
-				if rpcErr != nil {
-					return rpcErr
-				}
-				voutMap.Store(tid, result.GetMapArray("vout"))
-				return nil
-			})
-		}(txid)
-	}
-	if err := g.Wait(); err != nil {
-		return nil, err
-	}
 	r := goutil.Map{}
-	voutMap.Range(func(key, value interface{}) bool {
-		r.Set(key.(string), goutil.MapArrayV(value))
-		return true
-	})
+	for _, txid := range txids {
+		var result goutil.Map
+		rpcErr := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetRawTransaction, []interface{}{txid, 1}, &result)
+		if rpcErr != nil {
+			return nil, rpcErr
+		}
+		r.Set(txid, result.Get("vout"))
+	}
 	return r, nil
 }
 
 func rpcLogByTxids(txids []string) (goutil.Map, error) {
 	txids = goutil.RemoveDupString(txids)
-	var (
-		g       errgroup.Group
-		voutMap = &sync.Map{}
-	)
-	for _, txid := range txids {
-		go func(tid string) {
-			g.Go(func() error {
-				var result goutil.Map
-				rpcErr := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetApplicationLog, []interface{}{tid}, &result)
-				if rpcErr != nil {
-					return rpcErr
-				}
-				voutMap.Store(tid, result)
-				return nil
-			})
-		}(txid)
-	}
-	if err := g.Wait(); err != nil {
-		return nil, err
-	}
 	r := goutil.Map{}
-	voutMap.Range(func(key, value interface{}) bool {
-		r.Set(key.(string), goutil.MapV(value))
-		return true
-	})
+	for _, txid := range txids {
+		var result goutil.Map
+		rpcErr := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetApplicationLog, []interface{}{txid}, &result)
+		if rpcErr != nil {
+			return nil, rpcErr
+		}
+		r.Set(txid, result)
+	}
 	return r, nil
 }
 
