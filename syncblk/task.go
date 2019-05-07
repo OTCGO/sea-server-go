@@ -91,7 +91,7 @@ func runTask(task SyncTask) {
 				log.Error("[Sync] task(%v) do sync err: %v", task.Name(), err)
 				continue
 			}
-			log.Info("[Sync] task(%v) do sync success at height(%v)", h)
+			log.Info("[Sync] task(%v) do sync success at height(%v)",task.Name(), h)
 			h++
 		}
 	}
