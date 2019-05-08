@@ -19,8 +19,8 @@ const (
 )
 
 var (
-	tasks = map[string]SyncTask{}
-	superNode  *supernode.NodeInfo
+	tasks     = map[string]SyncTask{}
+	superNode *supernode.NodeInfo
 )
 
 type SyncTask interface {
@@ -91,8 +91,31 @@ func runTask(task SyncTask) {
 				log.Error("[Sync] task(%v) do sync at height(%v) err: %v", task.Name(), h, err)
 				continue
 			}
-			log.Info("[Sync] task(%v) do sync success at height(%v)",task.Name(), h)
+			log.Info("[Sync] task(%v) do sync success at height(%v)", task.Name(), h)
 			h++
 		}
 	}
+}
+
+func splitHeight(start, end, threads, size int) (heights []goutil.Map) {
+	if start <= end {
+		return
+	}
+	num := (end - start) / size
+	if num < threads && (end-start)%size > 0 {
+		num += 1
+	}
+	curStart := start
+	for i := 0; i < num && i < threads; i++ {
+		curEnd := curStart + size
+		if curEnd > end {
+			curEnd = end
+		}
+		heights = append(heights, goutil.Map{
+			"start": curStart,
+			"end":   curEnd,
+		})
+		curStart += size
+	}
+	return
 }

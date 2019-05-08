@@ -82,3 +82,17 @@ func (sb *SyncBlock) Block(height int) (goutil.Map, error) {
 	}
 	return block, nil
 }
+
+type Blocks []*db.Block
+
+func (blocks Blocks) Len() int {
+	return len(blocks)
+}
+
+func (blocks Blocks) Swap(i, j int) {
+	blocks[i], blocks[j] = blocks[j], blocks[i]
+}
+
+func (blocks Blocks) Less(i, j int) bool {
+	return blocks[i].Height < blocks[j].Height
+}

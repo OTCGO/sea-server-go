@@ -16,3 +16,7 @@ NeoUrl = "https://test3.cityofzion.io:443"
 [log]
     outputWay = "console"  # "console" or "file"
     output = "./seago.log" # required only outputWay = "file"
+
+
+onlySyncBlock = false
+syncBlockThreads = 10

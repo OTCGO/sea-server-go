@@ -15,6 +15,8 @@ type Config struct {
 		OutputWay string
 		Output    string
 	}
+	OnlySyncBlock   bool
+	SyncBlockThread int
 }
 
 func Init(cfgName string) (err error) {
