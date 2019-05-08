@@ -11,11 +11,11 @@ import (
 type SyncUtxo struct {
 }
 
-func (sa *SyncUtxo) Name() string {
+func (su *SyncUtxo) Name() string {
 	return UtxoTask
 }
 
-func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
+func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 	if block == nil {
 		return fmt.Errorf("block is nil")
 	}
@@ -83,7 +83,7 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 			return fmt.Errorf("update claim fail(%v)", err)
 		}
 	}
-	err = db.MustUpdateStatus(db.Status{Name: sa.Name(), UpdateHeight: height})
+	err = db.MustUpdateStatus(db.Status{Name: su.Name(), UpdateHeight: height})
 	if err != nil {
 		log.Error("[SyncUtxo] update status by height(%v) err: %v", height, err)
 		return fmt.Errorf("update status fail(%v)", err)
@@ -91,8 +91,8 @@ func (sa *SyncUtxo) Sync(block goutil.Map) (err error) {
 	return nil
 }
 
-func (sa *SyncUtxo) BlockHeight() (int, int, error) {
-	status, err := db.GetStatus(sa.Name())
+func (su *SyncUtxo) BlockHeight() (int, int, error) {
+	status, err := db.GetStatus(su.Name())
 	if err != nil {
 		log.Error("[SyncUtxo] get status err: %v", err)
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
@@ -106,10 +106,14 @@ func (sa *SyncUtxo) BlockHeight() (int, int, error) {
 	return status.UpdateHeight, blockStatus.UpdateHeight, nil
 }
 
-func (sa *SyncUtxo) Block(height int) (goutil.Map, error) {
+func (su *SyncUtxo) Block(height int) (goutil.Map, error) {
 	b, err := db.GetBlock(height)
 	if err != nil {
 		return nil, err
 	}
 	return b.Raw, nil
+}
+
+func (su *SyncUtxo) Threads() int {
+	return 1
 }

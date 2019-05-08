@@ -9,6 +9,7 @@ import (
 )
 
 type SyncBlock struct {
+	threads int
 }
 
 func (sb *SyncBlock) Name() string {
@@ -83,7 +84,11 @@ func (sb *SyncBlock) Block(height int) (goutil.Map, error) {
 	return block, nil
 }
 
-type Blocks []*db.Block
+func (sb *SyncBlock) Threads() int {
+	return sb.threads
+}
+
+type Blocks []goutil.Map
 
 func (blocks Blocks) Len() int {
 	return len(blocks)
@@ -94,5 +99,5 @@ func (blocks Blocks) Swap(i, j int) {
 }
 
 func (blocks Blocks) Less(i, j int) bool {
-	return blocks[i].Height < blocks[j].Height
+	return blocks[i].GetInt64("index") < blocks[j].GetInt64("index")
 }

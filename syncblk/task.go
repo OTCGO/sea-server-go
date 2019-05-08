@@ -2,9 +2,13 @@ package syncblk
 
 import (
 	"fmt"
+	"github.com/OTCGO/sea-server-go/config"
 	"github.com/OTCGO/sea-server-go/syncblk/supernode"
 	"github.com/hzxiao/goutil"
+	"github.com/hzxiao/goutil/container"
 	"github.com/hzxiao/goutil/log"
+	"sort"
+	"sync"
 	"time"
 )
 
@@ -28,10 +32,16 @@ type SyncTask interface {
 	Sync(block goutil.Map) error
 	BlockHeight() (int, int, error)
 	Block(height int) (goutil.Map, error)
+	Threads() int
 }
 
 func Init() error {
-	err := Register(&SyncBlock{}, &SyncAssets{}, &SyncUtxo{}, &SyncBalance{}, &SyncHistory{})
+	tasks := []SyncTask{&SyncBlock{threads: config.Conf.SyncBlockThreads},
+		&SyncAssets{}, &SyncUtxo{}, &SyncBalance{}, &SyncHistory{}}
+	if config.Conf.OnlySyncBlock {
+		tasks = tasks[:1]
+	}
+	err := Register(tasks...)
 	if err != nil {
 		return err
 	}
@@ -79,26 +89,49 @@ func runTask(task SyncTask) {
 			continue
 		}
 
-		var h = saveHeight + 1
-		for h <= latestHeight {
-			block, err := task.Block(h)
+		var wg = &sync.WaitGroup{}
+		var blocks = container.NewSafeSlice(0)
+		heights, count := splitHeight(saveHeight+1, latestHeight+1, task.Threads(), 10)
+		for _, info := range heights {
+			wg.Add(1)
+			go func(start, end int) {
+				defer wg.Done()
+				for i := start; i < end; i++ {
+					block, err := task.Block(i)
+					if err != nil {
+						log.Error("[Sync] task(%v) get block for height(%v) err: %v", task.Name(), i, err)
+						return
+					}
+					blocks.Append(block)
+				}
+			}(info["start"], info["end"])
+		}
+		wg.Wait()
+
+		if blocks.Len() != count {
+			log.Error("[Sync] task(%v) get blocks less than count(%v) err: %v", task.Name(), count, err)
+			continue
+		}
+
+		blockMaps := make([]goutil.Map, 0)
+		blocks.Range(func(v interface{}) bool {
+			blockMaps = append(blockMaps, goutil.MapV(v))
+			return true
+		})
+		sort.Sort(Blocks(blockMaps))
+		for _, b := range blockMaps {
+			err = task.Sync(b)
 			if err != nil {
-				log.Error("[Sync] task(%v) get block for height(%v) err: %v", task.Name(), h, err)
-				continue
+				log.Error("[Sync] task(%v) do sync at height(%v) err: %v", task.Name(), b.GetInt64("index")+1, err)
+				break
 			}
-			err = task.Sync(block)
-			if err != nil {
-				log.Error("[Sync] task(%v) do sync at height(%v) err: %v", task.Name(), h, err)
-				continue
-			}
-			log.Info("[Sync] task(%v) do sync success at height(%v)", task.Name(), h)
-			h++
+			log.Info("[Sync] task(%v) do sync success at height(%v)", task.Name(), b.GetInt64("index")+1)
 		}
 	}
 }
 
-func splitHeight(start, end, threads, size int) (heights []goutil.Map) {
-	if start <= end {
+func splitHeight(start, end, threads, size int) (heights []map[string]int, count int) {
+	if start >= end {
 		return
 	}
 	num := (end - start) / size
@@ -111,10 +144,11 @@ func splitHeight(start, end, threads, size int) (heights []goutil.Map) {
 		if curEnd > end {
 			curEnd = end
 		}
-		heights = append(heights, goutil.Map{
+		heights = append(heights, map[string]int{
 			"start": curStart,
 			"end":   curEnd,
 		})
+		count += curEnd - curStart
 		curStart += size
 	}
 	return

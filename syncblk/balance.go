@@ -14,11 +14,11 @@ import (
 type SyncBalance struct {
 }
 
-func (sa *SyncBalance) Name() string {
+func (sb *SyncBalance) Name() string {
 	return BalanceTask
 }
 
-func (sa *SyncBalance) Sync(block goutil.Map) (err error) {
+func (sb *SyncBalance) Sync(block goutil.Map) (err error) {
 	if block == nil {
 		return fmt.Errorf("block is nil")
 	}
@@ -43,7 +43,7 @@ func (sa *SyncBalance) Sync(block goutil.Map) (err error) {
 			return fmt.Errorf("update balance fail(%v)", err)
 		}
 	}
-	err = db.MustUpdateStatus(db.Status{Name: sa.Name(), UpdateHeight: height})
+	err = db.MustUpdateStatus(db.Status{Name: sb.Name(), UpdateHeight: height})
 	if err != nil {
 		log.Error("[SyncBalance] update status by height(%v) err: %v", height, err)
 		return fmt.Errorf("update status fail(%v)", err)
@@ -51,8 +51,8 @@ func (sa *SyncBalance) Sync(block goutil.Map) (err error) {
 	return nil
 }
 
-func (sa *SyncBalance) BlockHeight() (int, int, error) {
-	status, err := db.GetStatus(sa.Name())
+func (sb *SyncBalance) BlockHeight() (int, int, error) {
+	status, err := db.GetStatus(sb.Name())
 	if err != nil {
 		log.Error("[SyncBalance] get status err: %v", err)
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
@@ -74,7 +74,7 @@ func (sa *SyncBalance) BlockHeight() (int, int, error) {
 	return status.UpdateHeight, int(min), nil
 }
 
-func (sa *SyncBalance) Block(height int) (goutil.Map, error) {
+func (sb *SyncBalance) Block(height int) (goutil.Map, error) {
 	upts, err := db.ListUptByHeight(height)
 	if err != nil {
 		return nil, err
@@ -89,6 +89,10 @@ func (sa *SyncBalance) Block(height int) (goutil.Map, error) {
 	}
 	block.Set("info", info)
 	return block, nil
+}
+
+func (sb *SyncBalance) Threads() int {
+	return 1
 }
 
 func rpcGetBalance(asset, address string) (string, error) {

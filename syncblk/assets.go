@@ -81,6 +81,10 @@ func (sa *SyncAssets) Block(height int) (goutil.Map, error) {
 	return b.Raw, nil
 }
 
+func (sa *SyncAssets) Threads() int {
+	return 1
+}
+
 func parseGlobalAsset(tx goutil.Map) *db.Assets {
 	return &db.Assets{
 		Asset:    strings.TrimPrefix(tx.GetString("txid"), "0x"),

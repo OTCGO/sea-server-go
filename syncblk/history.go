@@ -177,6 +177,10 @@ func (sa *SyncHistory) Block(height int) (goutil.Map, error) {
 	return b.Raw, nil
 }
 
+func (sa *SyncHistory) Threads() int {
+	return 1
+}
+
 func rpcUtxoByTxids(txids []string) (goutil.Map, error) {
 	txids = goutil.RemoveDupString(txids)
 	r := goutil.Map{}
