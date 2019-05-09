@@ -23,30 +23,21 @@ func (sa *SyncAssets) Sync(block goutil.Map) error {
 	}
 
 	height := int(block.GetInt64("index")) + 1
-
-	var err error
-	for _, tx := range block.GetMapArray("tx") {
-		if tx.GetString("type") == "RegisterTransaction" {
-			asset := parseGlobalAsset(tx)
-			_, err = db.InsertAssets(asset)
-			if err != nil {
-				log.Error("[SyncAssets] insert global asset(%v) at height(%v) err: %v", asset.Asset, height, err)
-				return fmt.Errorf("insert global asset(%v) fail(%v)", asset.Asset, err)
-			}
+	res, err := sa.Handle(block)
+	if err != nil {
+		log.Error("[SyncAssets] handle at height(%v) err: %v", height, err)
+		return err
+	}
+	if res != nil {
+		assets, ok := res.([]*db.Assets)
+		if !ok {
+			return fmt.Errorf("assert err")
 		}
-		if neo.IsRegisterNep5AssetTx(tx) {
-			asset, err := parseNep5Asset(tx)
-			if err != nil {
-				log.Error("[SyncAssets] parse nep5 asset by txid(%v) at height(%v) err: %v", tx.GetString("txid"), height, err)
-				return fmt.Errorf("parse nep5 asset by txid(%v) fail(%v)", tx.GetString("txid"), err)
-			}
-			if asset == nil {
-				continue
-			}
+		for _, asset := range assets {
 			_, err = db.InsertAssets(asset)
 			if err != nil {
-				log.Error("[SyncAssets] insert global asset(%v) at height(%v) err: %v", asset.Asset, height, err)
-				return fmt.Errorf("insert global asset(%v) fail(%v)", asset.Asset, err)
+				log.Error("[SyncAssets] insert asset(%v) at height(%v) err: %v", asset.Asset, height, err)
+				return fmt.Errorf("insert asset(%v) fail(%v)", asset.Asset, err)
 			}
 		}
 	}
@@ -56,6 +47,27 @@ func (sa *SyncAssets) Sync(block goutil.Map) error {
 		return fmt.Errorf("update status fail(%v)", err)
 	}
 	return nil
+}
+
+func (sa *SyncAssets) Handle(block goutil.Map) (interface{}, error) {
+	var assets []*db.Assets
+	for _, tx := range block.GetMapArray("tx") {
+		if tx.GetString("type") == "RegisterTransaction" {
+			asset := parseGlobalAsset(tx)
+			assets = append(assets, asset)
+		}
+		if neo.IsRegisterNep5AssetTx(tx) {
+			asset, err := parseNep5Asset(tx)
+			if err != nil {
+				return nil, fmt.Errorf("parse nep5 asset by txid(%v) fail(%v)", tx.GetString("txid"), err)
+			}
+			if asset == nil {
+				continue
+			}
+			assets = append(assets, asset)
+		}
+	}
+	return assets, nil
 }
 
 func (sa *SyncAssets) BlockHeight() (int, int, error) {

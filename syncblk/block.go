@@ -21,31 +21,15 @@ func (sb *SyncBlock) Sync(block goutil.Map) error {
 		return fmt.Errorf("block is nil")
 	}
 
-	delete(block, "confirmations")
-	delete(block, "nextblockhash")
-
-	var sysFee int64
-	for _, item := range block.GetMapArray("tx") {
-		sysFee += item.GetInt64("sys_fee")
-	}
-	var totalSysFee = sysFee
 	height := int(block.GetInt64("index")) + 1
-	if height > 1 {
-		prevBlock, err := db.GetBlock(height - 1)
-		if err != nil {
-			log.Error("[SyncBlock] get prev block by height(%v) err: %v", height-1, err)
-			return fmt.Errorf("get prev block fail(%v)", err)
-		}
-		totalSysFee += int64(prevBlock.TotalSysFee)
+	res, err := sb.Handle(block)
+	if err != nil {
+		log.Error("[SyncBlock] handle at height(%v) err: %v", height, err)
+		return fmt.Errorf("handle fail(%v)", err)
 	}
 
-	b := &db.Block{
-		Height:      height,
-		SysFee:      int(sysFee),
-		TotalSysFee: int(totalSysFee),
-		Raw:         block,
-	}
-	_, err := db.InsertBlock(b)
+	b, _ := res.(*db.Block)
+	_, err = db.InsertBlock(b)
 	if err != nil {
 		log.Error("[SyncBlock] insert block by height(%v) err: %v", height, err)
 		return fmt.Errorf("insert block fail(%v)", err)
@@ -57,6 +41,30 @@ func (sb *SyncBlock) Sync(block goutil.Map) error {
 		return fmt.Errorf("update status fail(%v)", err)
 	}
 	return nil
+}
+
+func (sb *SyncBlock) Handle(block goutil.Map) (interface{}, error) {
+	var sysFee int64
+	for _, item := range block.GetMapArray("tx") {
+		sysFee += item.GetInt64("sys_fee")
+	}
+	var totalSysFee = sysFee
+	height := int(block.GetInt64("index")) + 1
+	if height > 1 {
+		prevBlock, err := db.GetBlock(height - 1)
+		if err != nil {
+			return nil, fmt.Errorf("get prev block fail(%v)", err)
+		}
+		totalSysFee += int64(prevBlock.TotalSysFee)
+	}
+
+	b := &db.Block{
+		Height:      height,
+		SysFee:      int(sysFee),
+		TotalSysFee: int(totalSysFee),
+		Raw:         block,
+	}
+	return b, nil
 }
 
 func (sb *SyncBlock) BlockHeight() (int, int, error) {

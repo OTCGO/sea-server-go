@@ -29,6 +29,7 @@ var (
 
 type SyncTask interface {
 	Name() string
+	Handle(block goutil.Map) (interface{}, error)
 	Sync(block goutil.Map) error
 	BlockHeight() (int, int, error)
 	Block(height int) (goutil.Map, error)

@@ -14,17 +14,45 @@ import (
 type SyncHistory struct {
 }
 
-func (sa *SyncHistory) Name() string {
+func (sh *SyncHistory) Name() string {
 	return HistoryTask
 }
 
-func (sa *SyncHistory) Sync(block goutil.Map) error {
+func (sh *SyncHistory) Sync(block goutil.Map) error {
 	if block == nil {
 		return fmt.Errorf("block is nil")
 	}
 
 	height := int(block.GetInt64("index")) + 1
+	res, err := sh.Handle(block)
+	if err != nil {
+		log.Error("[SyncHistory] handle at height(%v) err: %v", height, err)
+		return err
+	}
 
+	if res != nil {
+		historyList, ok := res.([]*db.History)
+		if !ok {
+			return fmt.Errorf("assert error")
+		}
+		for i := range historyList {
+			_, err = db.InsertOrIgnoreHistory(historyList[i])
+			if err != nil {
+				log.Error("[SyncHistory] update history by height(%v) err: %v", height, err)
+				return fmt.Errorf("update history fail(%v)", err)
+			}
+		}
+	}
+	//update status
+	err = db.MustUpdateStatus(db.Status{Name: sh.Name(), UpdateHeight: height})
+	if err != nil {
+		log.Error("[SyncHistory] update status by height(%v) err: %v", height, err)
+		return fmt.Errorf("update status fail(%v)", err)
+	}
+	return nil
+}
+
+func (sh *SyncHistory) Handle(block goutil.Map) (interface{}, error)  {
 	var err error
 	var (
 		gTxids, sTxids []string
@@ -33,19 +61,17 @@ func (sa *SyncHistory) Sync(block goutil.Map) error {
 		for _, vin := range tx.GetMapArray("vin") {
 			gTxids = append(gTxids, vin.GetString("txid"))
 		}
-		if tx.GetString("type") == "InvocationTransaction" {
+		if tx.GetString("type") == "InvocationTranshction" {
 			sTxids = append(sTxids, tx.GetString("txid"))
 		}
 	}
 	utxoMap, err := rpcUtxoByTxids(gTxids)
 	if err != nil {
-		log.Error("[SyncHistory] rpc get tx async err: %v", err)
-		return fmt.Errorf("rpc get tx async fail(%v)", err)
+		return nil, fmt.Errorf("rpc get tx async fail(%v)", err)
 	}
 	logMap, err := rpcLogByTxids(sTxids)
 	if err != nil {
-		log.Error("[SyncHistory] rpc get app log async err: %v", err)
-		return fmt.Errorf("rpc get app log async fail(%v)", err)
+		return nil, fmt.Errorf("rpc get app log async fail(%v)", err)
 	}
 
 	var historyList []*db.History
@@ -53,15 +79,14 @@ func (sa *SyncHistory) Sync(block goutil.Map) error {
 	for _, tx := range block.GetMapArray("tx") {
 		txid := tx.GetString("txid")
 		//nep5
-		if tx.GetString("type") == "InvocationTransaction" {
+		if tx.GetString("type") == "InvocationTranshction" {
 			appLog, ok := formatAppLog(logMap.GetMap(tx.GetString("txid")))
 			if !ok {
 				continue
 			}
 			hs, err := parseNep5History(appLog, txid, int(blockTime))
 			if err != nil {
-				log.Error("[SyncHistory] parse nep5 history by height(%v) err: %v", height, err)
-				return fmt.Errorf("parse nep5 history fail(%v)", err)
+				return nil, fmt.Errorf("parse nep5 history fail(%v)", err)
 			}
 			historyList = append(historyList, hs...)
 		}
@@ -71,8 +96,7 @@ func (sa *SyncHistory) Sync(block goutil.Map) error {
 		for _, vin := range tx.GetMapArray("vin") {
 			utxo := utxoMap.GetMapP(fmt.Sprintf("%v/%v", vin.GetString("txid"), vin.GetInt64("vout")))
 			if utxo == nil {
-				log.Error("[SyncHistory] lack of utxo(%v, %v)", vin.GetString("txid"), vin.GetInt64("vout"))
-				return fmt.Errorf("lack of utxo")
+				return nil, fmt.Errorf("lack of utxo(%v, %v)", vin.GetString("txid"), vin.GetInt64("vout"))
 			}
 			key := utxo.GetString("asset")+"_"+utxo.GetString("address")
 			value := utxo.GetString("value")
@@ -138,24 +162,11 @@ func (sa *SyncHistory) Sync(block goutil.Map) error {
 		}
 	}
 
-	for i := range historyList {
-		_, err = db.InsertOrIgnoreHistory(historyList[i])
-		if err != nil {
-			log.Error("[SyncHistory] update history by height(%v) err: %v", height, err)
-			return fmt.Errorf("update history fail(%v)", err)
-		}
-	}
-	//update status
-	err = db.MustUpdateStatus(db.Status{Name: sa.Name(), UpdateHeight: height})
-	if err != nil {
-		log.Error("[SyncHistory] update status by height(%v) err: %v", height, err)
-		return fmt.Errorf("update status fail(%v)", err)
-	}
-	return nil
+	return historyList, nil
 }
 
-func (sa *SyncHistory) BlockHeight() (int, int, error) {
-	status, err := db.GetStatus(sa.Name())
+func (sh *SyncHistory) BlockHeight() (int, int, error) {
+	status, err := db.GetStatus(sh.Name())
 	if err != nil {
 		log.Error("[SyncHistory] get status err: %v", err)
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
@@ -169,7 +180,7 @@ func (sa *SyncHistory) BlockHeight() (int, int, error) {
 	return status.UpdateHeight, assetStatus.UpdateHeight, nil
 }
 
-func (sa *SyncHistory) Block(height int) (goutil.Map, error) {
+func (sh *SyncHistory) Block(height int) (goutil.Map, error) {
 	b, err := db.GetBlock(height)
 	if err != nil {
 		return nil, err
@@ -177,7 +188,7 @@ func (sa *SyncHistory) Block(height int) (goutil.Map, error) {
 	return b.Raw, nil
 }
 
-func (sa *SyncHistory) Threads() int {
+func (sh *SyncHistory) Threads() int {
 	return 1
 }
 

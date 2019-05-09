@@ -21,7 +21,41 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 	}
 
 	height := int(block.GetInt64("index")) + 1
+	res, _ := su.Handle(block)
 
+	m, _ := res.(map[string]interface{})
+	utxos, _ := m["utxos"].([]*db.Utxos)
+	for _, utxo := range utxos {
+		err = db.UpdateUtxoClaim(utxo)
+		if err != nil {
+			log.Error("[SyncUtxo] update utxo by txid(%v) height(%v) err: %v", utxo.Txid, height, err)
+			return fmt.Errorf("update utxo fail(%v)", err)
+		}
+	}
+
+	addressInfo, _ := m["addressInfo"].(map[string]struct{})
+	for k := range addressInfo {
+		infos := strings.Split(k, "-")
+		upt := &db.Upt{Address: infos[0], Asset: infos[1], UpdateHeight: height}
+		_, err = db.InsertOrUpdateUpt(upt)
+		if err != nil {
+			log.Error("[SyncUtxo] update upt by height(%v) err: %v", height, err)
+			return fmt.Errorf("update upt fail(%v)", err)
+		}
+	}
+
+	err = db.MustUpdateStatus(db.Status{Name: su.Name(), UpdateHeight: height})
+	if err != nil {
+		log.Error("[SyncUtxo] update status by height(%v) err: %v", height, err)
+		return fmt.Errorf("update status fail(%v)", err)
+	}
+	return nil
+}
+
+func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
+	height := int(block.GetInt64("index")) + 1
+
+	var utxos = make([]*db.Utxos, 0)
 	var addressInfo = map[string]struct{}{}
 	for _, tx := range block.GetMapArray("tx") {
 		txid := tx.GetString("txid")
@@ -36,11 +70,7 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 				Height:  height,
 				Status:  1,
 			}
-			_, err = db.InsertUtxo(uxto)
-			if err != nil {
-				log.Error("[SyncUtxo] insert vout by txid(%v) height(%v) err: %v", txid, height, err)
-				return fmt.Errorf("insert vout fail(%v)", err)
-			}
+			utxos = append(utxos, uxto)
 			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
 		}
 		//vin
@@ -51,11 +81,7 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 				SpentTxid:   txid,
 				IndexN:      int(vin.GetInt64("vout")),
 			}
-			err = db.UpdateUtxoVinAndRet(uxto)
-			if err != nil {
-				log.Error("[SyncUtxo] update vin by txid(%v) height(%v) err: %v", txid, height, err)
-				return fmt.Errorf("update vin fail(%v)", err)
-			}
+			utxos = append(utxos, uxto)
 			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
 		}
 
@@ -67,28 +93,14 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 				ClaimTxid:   txid,
 				IndexN:      int(claim.GetInt64("vout")),
 			}
-			err = db.UpdateUtxoClaim(uxto)
-			if err != nil {
-				log.Error("[SyncUtxo] update claim by txid(%v) height(%v) err: %v", txid, height, err)
-				return fmt.Errorf("update claim fail(%v)", err)
-			}
+			utxos = append(utxos, uxto)
 		}
 	}
-	for k := range addressInfo {
-		infos := strings.Split(k, "-")
-		upt := &db.Upt{Address: infos[0], Asset: infos[1], UpdateHeight: height}
-		_, err = db.InsertOrUpdateUpt(upt)
-		if err != nil {
-			log.Error("[SyncUtxo] update upt by height(%v) err: %v", height, err)
-			return fmt.Errorf("update claim fail(%v)", err)
-		}
-	}
-	err = db.MustUpdateStatus(db.Status{Name: su.Name(), UpdateHeight: height})
-	if err != nil {
-		log.Error("[SyncUtxo] update status by height(%v) err: %v", height, err)
-		return fmt.Errorf("update status fail(%v)", err)
-	}
-	return nil
+
+	return map[string]interface{}{
+		"utxos":       utxos,
+		"addressInfo": addressInfo,
+	}, nil
 }
 
 func (su *SyncUtxo) BlockHeight() (int, int, error) {

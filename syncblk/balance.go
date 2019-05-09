@@ -24,23 +24,22 @@ func (sb *SyncBalance) Sync(block goutil.Map) (err error) {
 	}
 
 	height := int(block.GetInt64("index")) + 1
-	for _, info := range block.GetMapArray("info") {
-		address, asset := info.GetString("address"), info.GetString("asset")
-		balance, err := rpcGetBalance(asset, address)
-		if err != nil {
-			log.Error("[SyncBalance] rpc get balance by asset(%v), address(%v) err: %v", asset, address, err)
-			return fmt.Errorf("rpc get balance fail(%v)", err)
+	res, err := sb.Handle(block)
+	if err != nil {
+		log.Error("[SyncBalance] handle at height(%v) err: %v", height, err)
+		return err
+	}
+	if res != nil {
+		balances, ok := res.([]*db.Balance)
+		if !ok {
+			return fmt.Errorf("assert err")
 		}
-		b := &db.Balance{
-			Asset:             asset,
-			Address:           address,
-			Value:             balance,
-			LastUpdatedHeight: height,
-		}
-		_, err = db.InsertOrUpdateBalance(b)
-		if err != nil {
-			log.Error("[SyncBalance] update balance by height(%v) err: %v", height, err)
-			return fmt.Errorf("update balance fail(%v)", err)
+		for _, b := range balances {
+			_, err = db.InsertOrUpdateBalance(b)
+			if err != nil {
+				log.Error("[SyncBalance] update balance by height(%v) err: %v", height, err)
+				return fmt.Errorf("update balance fail(%v)", err)
+			}
 		}
 	}
 	err = db.MustUpdateStatus(db.Status{Name: sb.Name(), UpdateHeight: height})
@@ -49,6 +48,25 @@ func (sb *SyncBalance) Sync(block goutil.Map) (err error) {
 		return fmt.Errorf("update status fail(%v)", err)
 	}
 	return nil
+}
+
+func (sb *SyncBalance) Handle(block goutil.Map) (interface{}, error) {
+	var balances []*db.Balance
+	for _, info := range block.GetMapArray("info") {
+		address, asset := info.GetString("address"), info.GetString("asset")
+		balance, err := rpcGetBalance(asset, address)
+		if err != nil {
+			return nil, fmt.Errorf("rpc get balance fail(%v)", err)
+		}
+		b := &db.Balance{
+			Asset:             asset,
+			Address:           address,
+			Value:             balance,
+			LastUpdatedHeight: height,
+		}
+		balances = append(balances, b)
+	}
+	return balances, nil
 }
 
 func (sb *SyncBalance) BlockHeight() (int, int, error) {
