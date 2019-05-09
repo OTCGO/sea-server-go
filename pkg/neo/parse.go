@@ -83,7 +83,7 @@ func (c *ContractInfo) parseStorageDynamic() (err error) {
 		return fmt.Errorf("parse storage dynamic err: %v", err)
 	}
 	if elem == nil {
-		return fmt.Errorf("parse storage dynamic fail value is nil")
+		return
 	}
 	v, ok := elem.(int)
 	if !ok {
