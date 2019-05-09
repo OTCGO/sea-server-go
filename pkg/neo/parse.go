@@ -107,7 +107,7 @@ func (c *ContractInfo) parseReturnType() (err error) {
 
 	str, ok := elem.(string)
 	if ok {
-		mark, err := strconv.ParseInt(ReverseBigLitterEndian(str), 16, 8)
+		mark, err := strconv.ParseInt(ReverseBigLitterEndian(str), 16, 64)
 		if err != nil {
 			return fmt.Errorf("parse return type parse str to int err: %v", err)
 		}
@@ -128,7 +128,7 @@ func (c *ContractInfo) parseParameter() (err error) {
 		return fmt.Errorf("parse parameter err: %v", err)
 	}
 	if elem == nil {
-		return fmt.Errorf("parse parameter fail value is nil")
+		return
 	}
 
 	str, ok := elem.(string)
