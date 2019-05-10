@@ -86,6 +86,8 @@ func initTaskAndServer() (err error) {
 		}
 		syncblk.SyncAll()
 	}
+
+	server.Init()
 	go server.Run()
 
 	return

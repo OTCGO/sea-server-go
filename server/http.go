@@ -8,9 +8,13 @@ import (
 	"net/http"
 )
 
-func Run() {
-	g := gin.New()
+var g *gin.Engine
 
+func Init()  {
+	g = gin.New()
+}
+
+func Run() {
 	g.Use(gin.Recovery())
 	g.Use(NoCache)
 	g.Use(Options)
