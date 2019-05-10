@@ -50,7 +50,7 @@ func WriteJSON(c *gin.Context, data interface{}, err error) {
 func formatResult(data interface{}, err error) interface{} {
 	if err != nil {
 		if data == nil {
-			return goutil.Map{"result": false, "error": err}
+			return goutil.Map{"result": false, "error": err.Error()}
 		}
 		if m, ok := data.(goutil.Map); ok {
 			m.Set("result", false)
