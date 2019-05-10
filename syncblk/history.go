@@ -9,9 +9,12 @@ import (
 	"github.com/hzxiao/goutil/log"
 	"sort"
 	"strings"
+	"sync/atomic"
 )
 
 type SyncHistory struct {
+	height int32
+	status int32
 }
 
 func (sh *SyncHistory) Name() string {
@@ -49,6 +52,8 @@ func (sh *SyncHistory) Sync(block goutil.Map) error {
 		log.Error("[SyncHistory] update status by height(%v) err: %v", height, err)
 		return fmt.Errorf("update status fail(%v)", err)
 	}
+
+	atomic.StoreInt32(&sh.height, int32(height))
 	return nil
 }
 
@@ -190,6 +195,17 @@ func (sh *SyncHistory) Block(height int) (goutil.Map, error) {
 
 func (sh *SyncHistory) Threads() int {
 	return 1
+}
+
+func (sh *SyncHistory) SetStatus(status int32)  {
+	atomic.StoreInt32(&sh.status, status)
+}
+
+func (sh *SyncHistory) Stats() goutil.Map {
+	return goutil.Map{
+		"height": atomic.LoadInt32(&sh.height),
+		"status": atomic.LoadInt32(&sh.status),
+	}
 }
 
 func rpcUtxoByTxids(txids []string) (goutil.Map, error) {

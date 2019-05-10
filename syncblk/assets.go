@@ -8,9 +8,12 @@ import (
 	"github.com/hzxiao/goutil/log"
 	"strconv"
 	"strings"
+	"sync/atomic"
 )
 
 type SyncAssets struct {
+	height int32
+	status int32
 }
 
 func (sa *SyncAssets) Name() string {
@@ -46,6 +49,8 @@ func (sa *SyncAssets) Sync(block goutil.Map) error {
 		log.Error("[SyncAssets] update status by height(%v) err: %v", height, err)
 		return fmt.Errorf("update s  tatus fail(%v)", err)
 	}
+
+	atomic.StoreInt32(&sa.height, int32(height))
 	return nil
 }
 
@@ -95,6 +100,17 @@ func (sa *SyncAssets) Block(height int) (goutil.Map, error) {
 
 func (sa *SyncAssets) Threads() int {
 	return 1
+}
+
+func (sa *SyncAssets) SetStatus(status int32)  {
+	atomic.StoreInt32(&sa.status, status)
+}
+
+func (sa *SyncAssets) Stats() goutil.Map {
+	return goutil.Map{
+		"height": atomic.LoadInt32(&sa.height),
+		"status": atomic.LoadInt32(&sa.status),
+	}
 }
 
 func parseGlobalAsset(tx goutil.Map) *db.Assets {

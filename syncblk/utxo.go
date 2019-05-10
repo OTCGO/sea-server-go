@@ -6,9 +6,12 @@ import (
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/log"
 	"strings"
+	"sync/atomic"
 )
 
 type SyncUtxo struct {
+	height int32
+	status int32
 }
 
 func (su *SyncUtxo) Name() string {
@@ -49,6 +52,8 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 		log.Error("[SyncUtxo] update status by height(%v) err: %v", height, err)
 		return fmt.Errorf("update status fail(%v)", err)
 	}
+
+	atomic.StoreInt32(&su.height, int32(height))
 	return nil
 }
 
@@ -128,4 +133,15 @@ func (su *SyncUtxo) Block(height int) (goutil.Map, error) {
 
 func (su *SyncUtxo) Threads() int {
 	return 1
+}
+
+func (su *SyncUtxo) SetStatus(status int32)  {
+	atomic.StoreInt32(&su.status, status)
+}
+
+func (su *SyncUtxo) Stats() goutil.Map {
+	return goutil.Map{
+		"height": atomic.LoadInt32(&su.height),
+		"status": atomic.LoadInt32(&su.status),
+	}
 }

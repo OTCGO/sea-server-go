@@ -9,9 +9,12 @@ import (
 	"github.com/hzxiao/goutil/log"
 	"math"
 	"strings"
+	"sync/atomic"
 )
 
 type SyncBalance struct {
+	height int32
+	status int32
 }
 
 func (sb *SyncBalance) Name() string {
@@ -47,6 +50,8 @@ func (sb *SyncBalance) Sync(block goutil.Map) (err error) {
 		log.Error("[SyncBalance] update status by height(%v) err: %v", height, err)
 		return fmt.Errorf("update status fail(%v)", err)
 	}
+
+	atomic.StoreInt32(&sb.height, int32(height))
 	return nil
 }
 
@@ -112,6 +117,17 @@ func (sb *SyncBalance) Block(height int) (goutil.Map, error) {
 
 func (sb *SyncBalance) Threads() int {
 	return 1
+}
+
+func (sb *SyncBalance) SetStatus(status int32)  {
+	atomic.StoreInt32(&sb.status, status)
+}
+
+func (sb *SyncBalance) Stats() goutil.Map {
+	return goutil.Map{
+		"height": atomic.LoadInt32(&sb.height),
+		"status": atomic.LoadInt32(&sb.status),
+	}
 }
 
 func rpcGetBalance(asset, address string) (string, error) {

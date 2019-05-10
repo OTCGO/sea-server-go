@@ -6,10 +6,13 @@ import (
 	"github.com/OTCGO/sea-server-go/pkg/neo"
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/log"
+	"sync/atomic"
 )
 
 type SyncBlock struct {
 	threads int
+	height int32
+	status int32
 }
 
 func (sb *SyncBlock) Name() string {
@@ -40,6 +43,8 @@ func (sb *SyncBlock) Sync(block goutil.Map) error {
 		log.Error("[SyncBlock] update status by height(%v) err: %v", height, err)
 		return fmt.Errorf("update status fail(%v)", err)
 	}
+
+	atomic.StoreInt32(&sb.height, int32(height))
 	return nil
 }
 
@@ -94,6 +99,17 @@ func (sb *SyncBlock) Block(height int) (goutil.Map, error) {
 
 func (sb *SyncBlock) Threads() int {
 	return sb.threads
+}
+
+func (sb *SyncBlock) SetStatus(status int32)  {
+	atomic.StoreInt32(&sb.status, status)
+}
+
+func (sb *SyncBlock) Stats() goutil.Map {
+	return goutil.Map{
+		"height": atomic.LoadInt32(&sb.height),
+		"status": atomic.LoadInt32(&sb.status),
+	}
 }
 
 type Blocks []goutil.Map

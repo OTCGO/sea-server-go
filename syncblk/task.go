@@ -23,6 +23,12 @@ const (
 	HistoryTask = "history"
 )
 
+// task status
+const (
+	taskStoped int32 = iota
+	taskRunning
+)
+
 var (
 	tasks     = map[string]SyncTask{}
 	superNode *supernode.NodeInfo
@@ -35,6 +41,8 @@ type SyncTask interface {
 	BlockHeight() (int, int, error)
 	Block(height int) (goutil.Map, error)
 	Threads() int
+	SetStatus(status int32)
+	Stats() goutil.Map
 }
 
 func Init() error {
@@ -73,7 +81,9 @@ func runTask(task SyncTask) {
 		if e := recover(); e != nil {
 			log.Error("[Sync] task(%v) panic by err: %v", e)
 		}
+		task.SetStatus(taskStoped)
 	}()
+	task.SetStatus(taskRunning)
 	log.Info("[Sync] task(%v) start run", task.Name())
 	ticker := time.NewTicker(dur)
 	defer ticker.Stop()
