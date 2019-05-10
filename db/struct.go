@@ -9,10 +9,10 @@ type Status struct {
 }
 
 type Block struct {
-	Height      int
-	SysFee      int
-	TotalSysFee int
-	Raw         goutil.Map
+	Height      int        `json:"height,omitempty"`
+	SysFee      int        `json:"sysFee"`
+	TotalSysFee int        `json:"totalSysFee"`
+	Raw         goutil.Map `json:"raw,omitempty"`
 }
 
 type Assets struct {
@@ -22,23 +22,23 @@ type Assets struct {
 	Name         string `json:"name,omitempty"`
 	Symbol       string `json:"symbol,omitempty"`
 	Version      string `json:"version,omitempty"`
-	Decimals     int    `json:"decimals,omitempty"`
+	Decimals     int    `json:"decimals"`
 	ContractName string `json:"contractName,omitempty"`
 }
 
 type Utxos struct {
-	ID          int
-	Txid        string
-	IndexN      int
-	Address     string
-	Value       string
-	Asset       string
-	Height      int
-	SpentTxid   string
-	SpentHeight int
-	ClaimTxid   string
-	ClaimHeight int
-	Status      int
+	ID          int    `json:"id,omitempty"`
+	Txid        string `json:"txid,omitempty"`
+	IndexN      int    `json:"indexN,omitempty"`
+	Address     string `json:"address,omitempty"`
+	Value       string `json:"value"`
+	Asset       string `json:"asset,omitempty"`
+	Height      int    `json:"height,omitempty"`
+	SpentTxid   string `json:"spentTxid,omitempty"`
+	SpentHeight int    `json:"spentHeight,omitempty"`
+	ClaimTxid   string `json:"claimTxid,omitempty"`
+	ClaimHeight int    `json:"claimHeight,omitempty"`
+	Status      int    `json:"status"`
 }
 
 type Upt struct {
@@ -49,20 +49,20 @@ type Upt struct {
 }
 
 type Balance struct {
-	ID                int
-	Address           string
-	Asset             string
-	Value             string
-	LastUpdatedHeight int
+	ID                int    `json:"id,omitempty"`
+	Address           string `json:"address,omitempty"`
+	Asset             string `json:"asset,omitempty"`
+	Value             string `json:"value"`
+	LastUpdatedHeight int    `json:"lastUpdatedHeight,omitempty"`
 }
 
 type History struct {
-	ID        int
-	Txid      string
-	Operation string
-	IndexN    int
-	Address   string
-	Value     string
-	Asset     string
-	Timepoint int
+	ID        int    `json:"id,omitempty"`
+	Txid      string `json:"txid,omitempty"`
+	Operation string `json:"operation,omitempty"`
+	IndexN    int    `json:"indexN,omitempty"`
+	Address   string `json:"address,omitempty"`
+	Value     string `json:"value"`
+	Asset     string `json:"asset,omitempty"`
+	Timepoint int    `json:"timepoint,omitempty"`
 }
