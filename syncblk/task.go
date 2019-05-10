@@ -7,6 +7,7 @@ import (
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/container"
 	"github.com/hzxiao/goutil/log"
+	"github.com/hzxiao/goutil/slice"
 	"sort"
 	"sync"
 	"time"
@@ -156,7 +157,19 @@ func splitHeight(start, end, threads, size int) (heights []map[string]int, count
 }
 
 //HandleOneHeight handle task by given height and return result
-func HandleOneHeight(height int, tasks ...SyncTask) []goutil.Map {
+func HandleOneHeight(height int, name string) ([]goutil.Map, error) {
+	if !slice.ContainsString([]string{"all", AssetsTask, BalanceTask, BlockTask, UtxoTask, HistoryTask}, name) {
+		return nil, fmt.Errorf("unknown task(%v)", name)
+	}
+	tasks := []SyncTask{&SyncBlock{}, &SyncAssets{}, &SyncUtxo{}, &SyncBalance{}, &SyncHistory{}}
+	if name != "all" {
+		for _, task := range tasks {
+			if task.Name() == name {
+				tasks = []SyncTask{task}
+				break
+			}
+		}
+	}
 	var stats []goutil.Map
 	for _, task := range tasks {
 		stat := goutil.Map{"task": task.Name()}
@@ -173,5 +186,5 @@ func HandleOneHeight(height int, tasks ...SyncTask) []goutil.Map {
 		stat.Set("data", res)
 		stats = append(stats, stat)
 	}
-	return stats
+	return stats, nil
 }

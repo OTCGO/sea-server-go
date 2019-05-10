@@ -8,6 +8,7 @@ var Conf = &Config{}
 
 type Config struct {
 	Net      string
+	Port     string
 	MySQLUrl string
 	Seeds    []string
 	NeoUrl   string
@@ -15,6 +16,7 @@ type Config struct {
 		OutputWay string
 		Output    string
 	}
+	OpenSync         bool
 	OnlySyncBlock    bool
 	SyncBlockThreads int
 }

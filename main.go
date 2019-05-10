@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/OTCGO/sea-server-go/config"
 	"github.com/OTCGO/sea-server-go/db"
+	"github.com/OTCGO/sea-server-go/server"
 	"github.com/OTCGO/sea-server-go/syncblk"
 	"github.com/OTCGO/sea-server-go/syncblk/supernode"
 	"github.com/hzxiao/goutil/log"
@@ -70,16 +71,22 @@ func initTaskAndServer() (err error) {
 	if err != nil {
 		return
 	}
+
 	err = db.InitStatus(syncblk.BlockTask, syncblk.AssetsTask,
 		syncblk.UtxoTask, syncblk.BalanceTask, syncblk.HistoryTask)
 	if err != nil {
 		return
 	}
-	supernode.Init()
-	err = syncblk.Init()
-	if err != nil {
-		return
+
+	if config.Conf.OpenSync {
+		supernode.Init()
+		err = syncblk.Init()
+		if err != nil {
+			return
+		}
+		syncblk.SyncAll()
 	}
-	syncblk.SyncAll()
+	go server.Run()
+
 	return
 }

@@ -1,4 +1,4 @@
-
+port = ":9891"
 net = "testnet"
 
 mysqlUrl = "root:123456@/sea_test?charset=utf8&loc=Local&parseTime=true"
@@ -12,6 +12,7 @@ seeds = [
 ]
 
 NeoUrl = "https://test3.cityofzion.io:443"
+openSync = false
 syncBlockThreads = 10
 onlySyncBlock = false
 

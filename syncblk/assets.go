@@ -44,7 +44,7 @@ func (sa *SyncAssets) Sync(block goutil.Map) error {
 	err = db.MustUpdateStatus(db.Status{Name: sa.Name(), UpdateHeight: height})
 	if err != nil {
 		log.Error("[SyncAssets] update status by height(%v) err: %v", height, err)
-		return fmt.Errorf("update status fail(%v)", err)
+		return fmt.Errorf("update s  tatus fail(%v)", err)
 	}
 	return nil
 }
