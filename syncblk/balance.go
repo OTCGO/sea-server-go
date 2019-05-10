@@ -51,6 +51,7 @@ func (sb *SyncBalance) Sync(block goutil.Map) (err error) {
 }
 
 func (sb *SyncBalance) Handle(block goutil.Map) (interface{}, error) {
+	height := int(block.GetInt64("index")) + 1
 	var balances []*db.Balance
 	for _, info := range block.GetMapArray("info") {
 		address, asset := info.GetString("address"), info.GetString("asset")

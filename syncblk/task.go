@@ -110,7 +110,7 @@ func runTask(task SyncTask) {
 		wg.Wait()
 
 		if blocks.Len() != count {
-			log.Error("[Sync] task(%v) get blocks less than count(%v) err: %v", task.Name(), count, err)
+			log.Error("[Sync] task(%v) get blocks less than count(%v)", task.Name(), count)
 			continue
 		}
 
@@ -153,4 +153,25 @@ func splitHeight(start, end, threads, size int) (heights []map[string]int, count
 		curStart += size
 	}
 	return
+}
+
+//HandleOneHeight handle task by given height and return result
+func HandleOneHeight(height int, tasks ...SyncTask) []goutil.Map {
+	var stats []goutil.Map
+	for _, task := range tasks {
+		stat := goutil.Map{"task": task.Name()}
+		block, err := task.Block(height)
+		if err != nil {
+			stat.Set("err", err)
+			stats = append(stats, stat)
+			continue
+		}
+		res, err := task.Handle(block)
+		if err != nil {
+			stat.Set("err", err)
+		}
+		stat.Set("data", res)
+		stats = append(stats, stat)
+	}
+	return stats
 }
