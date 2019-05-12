@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/OTCGO/sea-server-go/syncblk"
+	"github.com/OTCGO/sea-server-go/job/sync"
 	"github.com/gin-gonic/gin"
 	"github.com/hzxiao/goutil"
 	"strconv"
@@ -15,6 +15,6 @@ func mockSync(c *gin.Context) {
 		WriteJSON(c, nil, err)
 		return
 	}
-	stats, err := syncblk.HandleOneHeight(height, c.Param("task"))
+	stats, err := sync.HandleOneHeight(height, c.Param("task"))
 	WriteJSON(c, goutil.Map{"data": stats}, err)
 }

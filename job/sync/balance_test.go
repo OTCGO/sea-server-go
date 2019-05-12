@@ -1,14 +1,14 @@
-package syncblk
+package sync
 
 import (
 	"expvar"
-	"github.com/OTCGO/sea-server-go/syncblk/supernode"
+	"github.com/OTCGO/sea-server-go/job/node"
 	"github.com/hzxiao/goutil/assert"
 	"testing"
 )
 
 func initSuperNode()  {
-	superNode = &supernode.NodeInfo{
+	superNode = &node.NodeInfo{
 		FastestNode:     expvar.NewString("fastestNode"),
 		SupportLogNode:  expvar.NewString("supportLogNode"),
 	}

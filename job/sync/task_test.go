@@ -1,4 +1,4 @@
-package syncblk
+package sync
 
 import (
 	"github.com/hzxiao/goutil/assert"

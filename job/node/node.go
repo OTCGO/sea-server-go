@@ -1,4 +1,4 @@
-package supernode
+package node
 
 import (
 	"expvar"

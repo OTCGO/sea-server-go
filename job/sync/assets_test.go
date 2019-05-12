@@ -1,4 +1,4 @@
-package syncblk
+package sync
 
 import (
 	"github.com/OTCGO/sea-server-go/pkg/neo"
