@@ -81,9 +81,8 @@ github.com/gorilla/context v1.1.1/go.mod h1:kBGZzfjB9CEq2AlWe17Uuf7NDRt0dE0s8S51
 github.com/gorilla/mux v1.6.2/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
-github.com/hzxiao/goutil v0.0.0-20190502141334-a523988dbf05 h1:VY7fFJ8FDfhRu7iFIFjfJeEaRNtQJykGHtByW3I6eTk=
-github.com/hzxiao/goutil v0.0.0-20190502141334-a523988dbf05/go.mod h1:yWvyF1dMlvuyPSEFFBA4+2G8pF5ZLN/ENF+X5175InI=
-github.com/hzxiao/goutil v0.0.0-20190507061812-46c917d90968 h1:JOlBLBW6P+idUzsmTHb/O7cOerOEWamxts5Ab0G+2Uw=
+github.com/hzxiao/goutil v0.0.0-20190511024245-b12a37145e95 h1:l7dvIYj0DHoNbFK0LxgxWbEhOyveLuNuvj9Hvo8aoNA=
+github.com/hzxiao/goutil v0.0.0-20190511024245-b12a37145e95/go.mod h1:yWvyF1dMlvuyPSEFFBA4+2G8pF5ZLN/ENF+X5175InI=
 github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 h1:vr3AYkKovP8uR8AvSGGUK1IDqRa5lAAvEkZG1LKaCRc=
 github.com/jackc/fake v0.0.0-20150926172116-812a484cc733/go.mod h1:WrMFNQdiFJ80sQsxDoMokWK1W5TQtxBFNpzWTD84ibQ=
 github.com/jackc/pgx v3.3.0+incompatible h1:Wa90/+qsITBAPkAZjiByeIGHFcj3Ztu+VzrrIpHjL90=

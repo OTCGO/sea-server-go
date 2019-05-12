@@ -14,7 +14,7 @@ require (
 	github.com/go-xorm/core v0.6.2
 	github.com/go-xorm/xorm v0.7.1
 	github.com/google/go-cmp v0.3.0 // indirect
-	github.com/hzxiao/goutil v0.0.0-20190502141334-a523988dbf05
+	github.com/hzxiao/goutil v0.0.0-20190511024245-b12a37145e95
 	github.com/lib/pq v1.1.0 // indirect
 	golang.org/x/crypto v0.0.0-20190428033426-a29dc8fdc734
 	google.golang.org/appengine v1.5.0 // indirect
