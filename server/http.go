@@ -36,6 +36,7 @@ func registerHandler(g *gin.Engine) {
 	adm := net.Group("/adm")
 	{
 		adm.GET("/:height/:task/mockSync", mockSync)
+		adm.GET("/stats", stats)
 	}
 }
 

@@ -198,3 +198,13 @@ func HandleOneHeight(height int, name string) ([]goutil.Map, error) {
 	}
 	return stats, nil
 }
+
+func Stats() []goutil.Map {
+	var taskStats []goutil.Map
+	for k, task := range tasks {
+		stat := task.Stats()
+		stat.Set("task", k)
+		taskStats = append(taskStats, stat)
+	}
+	return taskStats
+}
