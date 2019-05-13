@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/OTCGO/sea-server-go/config"
 	"github.com/OTCGO/sea-server-go/db"
+	"github.com/OTCGO/sea-server-go/job/node"
 	"github.com/OTCGO/sea-server-go/job/sync"
+	"github.com/OTCGO/sea-server-go/pkg/neo"
 	"github.com/hzxiao/goutil"
 	"math"
 )
@@ -53,4 +55,15 @@ func (s *NeoService) Block(height int) (goutil.Map, error) {
 	}
 
 	return goutil.Struct2Map(block), nil
+}
+
+func (s *NeoService) Tx(txid string) (goutil.Map, error) {
+	var result goutil.Map
+	err := neo.Rpc(node.SuperNode.FastestNode.Value(),
+		neo.MethodGetRawTransaction, []interface{}{txid, 1}, &result)
+	return result, err
+}
+
+func (s *NeoService) Balance(address string) (goutil.Map, error) {
+	return nil, nil
 }
