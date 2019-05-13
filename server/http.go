@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/OTCGO/sea-server-go/config"
+	"github.com/OTCGO/sea-server-go/service"
 	"github.com/gin-gonic/gin"
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/log"
@@ -9,9 +10,11 @@ import (
 )
 
 var g *gin.Engine
+var neoService *service.NeoService
 
 func Init()  {
 	g = gin.New()
+	neoService = service.NewNeoService()
 }
 
 func Run() {
@@ -39,8 +42,8 @@ func registerHandler(g *gin.Engine) {
 		adm.GET("/stats", stats)
 	}
 
-	net.GET("/height", height)
-	net.GET("/block/:height", block)
+	net.GET("/height", neoHeight)
+	net.GET("/block/:height", neoBlock)
 }
 
 func WriteJSON(c *gin.Context, data interface{}, err error) {

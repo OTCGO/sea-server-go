@@ -9,7 +9,15 @@ import (
 	"math"
 )
 
-func Height() (goutil.Map, error) {
+type NeoService struct {
+
+}
+
+func NewNeoService() *NeoService {
+	return &NeoService{}
+}
+
+func (s *NeoService) Height() (goutil.Map, error) {
 	height := math.MaxInt32
 	//first, query from sync task
 	if config.Conf.OpenSync {
@@ -38,7 +46,7 @@ func Height() (goutil.Map, error) {
 	}, nil
 }
 
-func Block(height int) (goutil.Map, error) {
+func (s *NeoService) Block(height int) (goutil.Map, error) {
 	block, err := db.GetBlock(height)
 	if err != nil {
 		return nil, fmt.Errorf("get block(%v) error: %v", height, err)

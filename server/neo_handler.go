@@ -5,7 +5,6 @@ import (
 	"github.com/OTCGO/sea-server-go/config"
 	"github.com/OTCGO/sea-server-go/job/node"
 	"github.com/OTCGO/sea-server-go/job/sync"
-	"github.com/OTCGO/sea-server-go/service"
 	"github.com/gin-gonic/gin"
 	"github.com/hzxiao/goutil"
 	"strconv"
@@ -37,14 +36,14 @@ func stats(c *gin.Context) {
 
 // height get neo height
 // /height
-func height(c *gin.Context) {
-	res, err := service.Height()
+func neoHeight(c *gin.Context) {
+	res, err := neoService.Height()
 	WriteJSON(c, res, err)
 }
 
 // block get neo block by height
 // /block/:height
-func block(c *gin.Context) {
+func neoBlock(c *gin.Context) {
 	h, err := strconv.Atoi("height")
 	if err != nil {
 		WriteJSON(c, nil, err)
@@ -55,6 +54,6 @@ func block(c *gin.Context) {
 		return
 	}
 
-	res, err := service.Block(h)
+	res, err := neoService.Block(h)
 	WriteJSON(c, res, err)
 }
