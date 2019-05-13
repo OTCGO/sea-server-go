@@ -12,7 +12,7 @@ type Block struct {
 	Height      int        `json:"height,omitempty"`
 	SysFee      int        `json:"sysFee"`
 	TotalSysFee int        `json:"totalSysFee"`
-	Raw         goutil.Map `json:"raw,omitempty"`
+	Raw         goutil.Map `json:"-"`
 }
 
 type Assets struct {

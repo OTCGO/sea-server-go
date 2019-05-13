@@ -38,6 +38,9 @@ func registerHandler(g *gin.Engine) {
 		adm.GET("/:height/:task/mockSync", mockSync)
 		adm.GET("/stats", stats)
 	}
+
+	net.GET("/height", height)
+	net.GET("/block/:height", block)
 }
 
 func WriteJSON(c *gin.Context, data interface{}, err error) {
