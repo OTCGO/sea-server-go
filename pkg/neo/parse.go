@@ -137,7 +137,7 @@ func (c *ContractInfo) parseParameter() (err error) {
 	}
 
 	for i := 0; i < len(str)-1; i = i + 2 {
-		mark, err := strconv.ParseInt(str[i:i+2], 16, 8)
+		mark, err := strconv.ParseInt(str[i:i+2], 16, 64)
 		if err != nil {
 			return fmt.Errorf("parse parameter str to int: %v", err)
 		}
