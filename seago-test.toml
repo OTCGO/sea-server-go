@@ -16,6 +16,15 @@ openSync = false
 syncBlockThreads = 10
 onlySyncBlock = false
 
+[assets]
+    globalTypes = ["GoverningToken","UtilityToken","Share","Token"]
+    neo = "0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b"
+    gas = "0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"
+    seas = "0xbbb7a08e52a5242079487fead6753dd038d41197e04e342b6f7b7358936551ea"
+    seac = "0xe13440dccae716e16fc01adb3c96169d2d08d16581cad0ced0b4e193c472eac1"
+    cseas = "0x6780fd1a5c07d75eaa283bfa1c00cc3b029ff6ce"
+    cseac = "0xd7da38240fa5ccf5fa4527cb6f260793d3a4483a"
+
 [log]
     outputWay = "console"  # "console" or "file"
     output = "./seago.log" # required only outputWay = "file"

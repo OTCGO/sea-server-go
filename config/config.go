@@ -19,6 +19,17 @@ type Config struct {
 	OpenSync         bool
 	OnlySyncBlock    bool
 	SyncBlockThreads int
+	Assets           *AssetsConf
+}
+
+type AssetsConf struct {
+	GlobalTypes []string
+	Neo         string
+	Gas         string
+	Seas        string
+	Seac        string
+	CSeas       string
+	CSeac       string
 }
 
 func Init(cfgName string) (err error) {
