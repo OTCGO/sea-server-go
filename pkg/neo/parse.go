@@ -3,6 +3,7 @@ package neo
 import (
 	"fmt"
 	"github.com/OTCGO/sea-server-go/pkg/neo/opcode"
+	"github.com/hzxiao/goutil"
 	"strconv"
 )
 
@@ -87,7 +88,7 @@ func (c *ContractInfo) parseStorageDynamic() (err error) {
 	}
 	v, ok := elem.(int)
 	if !ok {
-		return fmt.Errorf("wrong type for storage&dynamic %v", elem)
+		return
 	}
 
 	c.UseStorage = v&0x01 == 0x01
@@ -102,7 +103,7 @@ func (c *ContractInfo) parseReturnType() (err error) {
 		return fmt.Errorf("parse return type err: %v", err)
 	}
 	if elem == nil {
-		return fmt.Errorf("parse return type fail value is nil")
+		return
 	}
 
 	str, ok := elem.(string)
@@ -153,15 +154,10 @@ func (c *ContractInfo) parseString() (value string, err error) {
 		return "", fmt.Errorf("parse string err: %v", err)
 	}
 	if elem == nil {
-		return "", fmt.Errorf("parse string fail value is nil")
+		return
 	}
 
-	str, ok := elem.(string)
-	if !ok {
-		return "", fmt.Errorf("wrong string type: %v", str)
-	}
-
-	return HexDecode(str), nil
+	return HexDecode(goutil.String(elem)), nil
 }
 
 func parseScriptElem(script string) (elem interface{}, rest string, err error) {
