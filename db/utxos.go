@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"github.com/hzxiao/goutil"
+	"strings"
 )
 
 const (
@@ -105,4 +106,46 @@ func InsertOrIgnoreHistory(h *History) (bool, error) {
 		Operation: h.Operation,
 		IndexN:    h.IndexN,
 	})
+}
+
+func GetUnclaimUtxo(asset, address string, height int) (goutil.Map, error) {
+	var utxos []*Utxos
+	err := db.engine.Table(TableUtxos).Where("asset = ? AND address = ? AND claim_height = ?", asset, address, 0).Find(&utxos)
+	if err != nil {
+		return nil, err
+	}
+
+	res := goutil.Map{}
+	for _, utxo := range utxos {
+		stopHash, stopIndex, status := "", height, false
+		if utxo.Status == 0 { 			//available
+			stopHash = utxo.SpentTxid
+			stopIndex = utxo.SpentHeight
+			status = true
+		}
+		txid := strings.TrimPrefix(utxo.Txid, "0x")
+		item := goutil.Map{
+			"startIndex": utxo.Height,
+			"stopHash":   stopHash,
+			"stopIndex":  stopIndex,
+			"value":      utxo.Value,
+			"status":     status,
+		}
+		res.Set(fmt.Sprintf("%v_%v", txid, utxo.IndexN), item)
+	}
+	return res, nil
+}
+
+func GetTotalSysFee(heights []int) (map[int]int, error) {
+	var blocks []*Block
+	err := db.engine.Table(TableBlock).In("height", heights).Cols("total_sys_fee").Find(&blocks)
+	if err != nil {
+		return nil, err
+	}
+
+	res := map[int]int{}
+	for _, b := range blocks {
+		res[b.Height] = b.TotalSysFee
+	}
+	return res, nil
 }
