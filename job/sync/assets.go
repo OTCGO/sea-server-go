@@ -25,7 +25,7 @@ func (sa *SyncAssets) Sync(block goutil.Map) error {
 		return fmt.Errorf("block is nil")
 	}
 
-	height := int(block.GetInt64("index")) + 1
+	height := int(block.GetInt64("index"))
 	res, err := sa.Handle(block)
 	if err != nil {
 		log.Error("[SyncAssets] handle at height(%v) err: %v", height, err)

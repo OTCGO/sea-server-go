@@ -23,7 +23,7 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 		return fmt.Errorf("block is nil")
 	}
 
-	height := int(block.GetInt64("index")) + 1
+	height := int(block.GetInt64("index"))
 	res, _ := su.Handle(block)
 
 	m, _ := res.(map[string]interface{})
@@ -58,7 +58,7 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 }
 
 func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
-	height := int(block.GetInt64("index")) + 1
+	height := int(block.GetInt64("index"))
 
 	var utxos = make([]*db.Utxos, 0)
 	var addressInfo = map[string]struct{}{}
@@ -67,13 +67,15 @@ func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
 		//vout
 		for _, vout := range tx.GetMapArray("vout") {
 			uxto := &db.Utxos{
-				Txid:    txid,
-				IndexN:  int(vout.GetInt64("n")),
-				Asset:   strings.TrimPrefix(vout.GetString("asset"), "0x"),
-				Value:   vout.GetString("value"),
-				Address: vout.GetString("address"),
-				Height:  height,
-				Status:  1,
+				Txid:        txid,
+				IndexN:      int(vout.GetInt64("n")),
+				Asset:       strings.TrimPrefix(vout.GetString("asset"), "0x"),
+				Value:       vout.GetString("value"),
+				Address:     vout.GetString("address"),
+				Height:      height,
+				Status:      1,
+				SpentHeight: -1,
+				ClaimHeight: -1,
 			}
 			utxos = append(utxos, uxto)
 			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
@@ -135,7 +137,7 @@ func (su *SyncUtxo) Threads() int {
 	return 1
 }
 
-func (su *SyncUtxo) SetStatus(status int32)  {
+func (su *SyncUtxo) SetStatus(status int32) {
 	atomic.StoreInt32(&su.status, status)
 }
 

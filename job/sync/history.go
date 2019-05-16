@@ -26,7 +26,7 @@ func (sh *SyncHistory) Sync(block goutil.Map) error {
 		return fmt.Errorf("block is nil")
 	}
 
-	height := int(block.GetInt64("index")) + 1
+	height := int(block.GetInt64("index"))
 	res, err := sh.Handle(block)
 	if err != nil {
 		log.Error("[SyncHistory] handle at height(%v) err: %v", height, err)

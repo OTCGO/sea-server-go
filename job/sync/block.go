@@ -24,7 +24,7 @@ func (sb *SyncBlock) Sync(block goutil.Map) error {
 		return fmt.Errorf("block is nil")
 	}
 
-	height := int(block.GetInt64("index")) + 1
+	height := int(block.GetInt64("index"))
 	res, err := sb.Handle(block)
 	if err != nil {
 		log.Error("[SyncBlock] handle at height(%v) err: %v", height, err)
@@ -79,18 +79,18 @@ func (sb *SyncBlock) BlockHeight() (int, int, error) {
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
 	}
 
-	var latestHeight int
-	err = neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetBlockCount, []interface{}{}, &latestHeight)
+	var blockCount int
+	err = neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetBlockCount, []interface{}{}, &blockCount)
 	if err != nil {
 		log.Error("[SyncBlock] rpc get block count err: %v", err)
 		return 0, 0, fmt.Errorf("rpc get block count fail(%v)", err)
 	}
-	return status.UpdateHeight, latestHeight, nil
+	return status.UpdateHeight, blockCount-1, nil
 }
 
 func (sb *SyncBlock) Block(height int) (goutil.Map, error) {
 	var block goutil.Map
-	err := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetBlock, []int{height - 1, 1}, &block)
+	err := neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetBlock, []int{height, 1}, &block)
 	if err != nil {
 		return nil, err
 	}

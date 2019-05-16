@@ -105,7 +105,7 @@ func InitStatus(names ...string) error {
 		if exists {
 			continue
 		}
-		err = InsertStatus(&Status{Name: name, UpdateHeight: 0})
+		err = InsertStatus(&Status{Name: name, UpdateHeight: -1})
 		if err != nil {
 			return fmt.Errorf("insert status by name(%v) err: %v", err)
 		}

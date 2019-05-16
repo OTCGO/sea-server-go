@@ -26,7 +26,7 @@ func (sb *SyncBalance) Sync(block goutil.Map) (err error) {
 		return fmt.Errorf("block is nil")
 	}
 
-	height := int(block.GetInt64("index")) + 1
+	height := int(block.GetInt64("index"))
 	res, err := sb.Handle(block)
 	if err != nil {
 		log.Error("[SyncBalance] handle at height(%v) err: %v", height, err)
@@ -56,7 +56,7 @@ func (sb *SyncBalance) Sync(block goutil.Map) (err error) {
 }
 
 func (sb *SyncBalance) Handle(block goutil.Map) (interface{}, error) {
-	height := int(block.GetInt64("index")) + 1
+	height := int(block.GetInt64("index"))
 	var balances []*db.Balance
 	for _, info := range block.GetMapArray("info") {
 		address, asset := info.GetString("address"), info.GetString("asset")
@@ -103,7 +103,7 @@ func (sb *SyncBalance) Block(height int) (goutil.Map, error) {
 	if err != nil {
 		return nil, err
 	}
-	block := goutil.Map{"index": height - 1}
+	block := goutil.Map{"index": height}
 	var info []goutil.Map
 	for _, upt := range upts {
 		info = append(info, goutil.Map{

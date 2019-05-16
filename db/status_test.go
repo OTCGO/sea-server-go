@@ -54,6 +54,14 @@ func TestMustUpdateStatus(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, exist)
 
+	s1.UpdateHeight = 0
+	err = MustUpdateStatus(s1)
+	assert.NoError(t, err)
+
+	exist, err = db.engine.Exist(&Status{ID: s.ID, UpdateHeight: s1.UpdateHeight})
+	assert.NoError(t, err)
+	assert.True(t, exist)
+
 	s2 := Status{Name: "x", UpdateHeight: 2}
 	err = MustUpdateStatus(s2)
 	assert.Error(t, err)

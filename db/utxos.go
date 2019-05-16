@@ -110,7 +110,7 @@ func InsertOrIgnoreHistory(h *History) (bool, error) {
 
 func GetUnclaimUtxo(asset, address string, height int) (goutil.Map, error) {
 	var utxos []*Utxos
-	err := db.engine.Table(TableUtxos).Where("asset = ? AND address = ? AND claim_height = ?", asset, address, 0).Find(&utxos)
+	err := db.engine.Table(TableUtxos).Where("asset = ? AND address = ? AND claim_height = ?", asset, address, -1).Find(&utxos)
 	if err != nil {
 		return nil, err
 	}
