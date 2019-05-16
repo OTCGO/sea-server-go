@@ -134,10 +134,10 @@ func runTask(task SyncTask) {
 		for _, b := range blockMaps {
 			err = task.Sync(b)
 			if err != nil {
-				log.Error("[Sync] task(%v) do sync at height(%v) err: %v", task.Name(), b.GetInt64("index")+1, err)
+				log.Error("[Sync] task(%v) do sync at height(%v) err: %v", task.Name(), b.GetInt64("index"), err)
 				break
 			}
-			log.Info("[Sync] task(%v) do sync success at height(%v)", task.Name(), b.GetInt64("index")+1)
+			log.Info("[Sync] task(%v) do sync success at height(%v)", task.Name(), b.GetInt64("index"))
 		}
 	}
 }

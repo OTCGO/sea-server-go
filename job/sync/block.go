@@ -54,8 +54,8 @@ func (sb *SyncBlock) Handle(block goutil.Map) (interface{}, error) {
 		sysFee += item.GetInt64("sys_fee")
 	}
 	var totalSysFee = sysFee
-	height := int(block.GetInt64("index")) + 1
-	if height > 1 {
+	height := int(block.GetInt64("index"))
+	if height > 0 {
 		prevBlock, err := db.GetBlock(height - 1)
 		if err != nil {
 			return nil, fmt.Errorf("get prev block fail(%v)", err)
