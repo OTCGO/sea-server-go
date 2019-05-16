@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS history (
 );
 
 CREATE TABLE IF NOT EXISTS block (
-  height INT UNSIGNED,
+  height INT,
   sys_fee INT UNSIGNED NOT NULL,
   total_sys_fee INT UNSIGNED NOT NULL,
   raw MEDIUMTEXT,
@@ -43,11 +43,11 @@ CREATE TABLE IF NOT EXISTS utxos (
   address VARCHAR(34) NOT NULL,
   value VARCHAR(40) NOT NULL,
   asset VARCHAR(64) NOT NULL,
-  height INT UNSIGNED NOT NULL,
+  height INT NOT NULL,
   spent_txid CHAR(66) DEFAULT NULL,
-  spent_height INT UNSIGNED DEFAULT NULL,
+  spent_height INT DEFAULT NULL,
   claim_txid CHAR(66) DEFAULT NULL,
-  claim_height INT UNSIGNED DEFAULT NULL,
+  claim_height INT DEFAULT NULL,
   status TINYINT UNSIGNED DEFAULT 1 NOT NULL, #0 unavailable 1 available 2 freeze
   PRIMARY KEY (id),
   UNIQUE INDEX uidx_txid_index (txid, index_n),
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS balance (
   address VARCHAR(34) NOT NULL,
   asset VARCHAR(64) NOT NULL,
   value VARCHAR(40) NOT NULL,
-  last_updated_height INT UNSIGNED DEFAULT NULL,
+  last_updated_height INT DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE INDEX uidx_address_asset (address, asset)
 );
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS upt (
   id INT UNSIGNED AUTO_INCREMENT,
   address VARCHAR(34) NOT NULL,
   asset VARCHAR(64) NOT NULL,
-  update_height INT UNSIGNED NOT NULL,
+  update_height INT NOT NULL,
   PRIMARY KEY (id),
   UNIQUE INDEX uidx_address_asset (address, asset)
 );
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS upt (
 CREATE TABLE IF NOT EXISTS status (
   id INT UNSIGNED AUTO_INCREMENT,
   name VARCHAR(20) NOT NULL,
-  update_height INT UNSIGNED NOT NULL,
+  update_height INT NOT NULL,
   PRIMARY KEY (id),
   UNIQUE INDEX uidx_name (name)
 );
