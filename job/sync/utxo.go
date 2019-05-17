@@ -27,16 +27,36 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 	res, _ := su.Handle(block)
 
 	m, _ := res.(map[string]interface{})
-	utxos, _ := m["utxos"].([]*db.Utxos)
-	for _, utxo := range utxos {
-		err = db.UpdateUtxoClaim(utxo)
+	var addressInfo = map[string]struct{}{}
+	vouts, _ := m["vouts"].([]*db.Utxos)
+	for _, utxo := range vouts {
+		_, err = db.InsertUtxo(utxo)
+		if err != nil {
+			log.Error("[SyncUtxo] insert utxo by txid(%v) height(%v) err: %v", utxo.Txid, height, err)
+			return fmt.Errorf("insert utxo fail(%v)", err)
+		}
+		addressInfo[fmt.Sprintf("%v-%v", utxo.Address, utxo.Asset)] = struct{}{}
+	}
+
+	vins, _ := m["vins"].([]*db.Utxos)
+	for _, utxo := range vins {
+		err = db.UpdateUtxoVinAndRet(utxo)
 		if err != nil {
 			log.Error("[SyncUtxo] update utxo by txid(%v) height(%v) err: %v", utxo.Txid, height, err)
 			return fmt.Errorf("update utxo fail(%v)", err)
 		}
+		addressInfo[fmt.Sprintf("%v-%v", utxo.Address, utxo.Asset)] = struct{}{}
 	}
 
-	addressInfo, _ := m["addressInfo"].(map[string]struct{})
+	claims, _ := m["claims"].([]*db.Utxos)
+	for _, utxo := range claims {
+		err = db.UpdateUtxoClaim(utxo)
+		if err != nil {
+			log.Error("[SyncUtxo] update utxo claim by txid(%v) height(%v) err: %v", utxo.Txid, height, err)
+			return fmt.Errorf("update utxo claim fail(%v)", err)
+		}
+	}
+
 	for k := range addressInfo {
 		infos := strings.Split(k, "-")
 		upt := &db.Upt{Address: infos[0], Asset: infos[1], UpdateHeight: height}
@@ -60,8 +80,11 @@ func (su *SyncUtxo) Sync(block goutil.Map) (err error) {
 func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
 	height := int(block.GetInt64("index"))
 
-	var utxos = make([]*db.Utxos, 0)
-	var addressInfo = map[string]struct{}{}
+	var (
+		vouts  = make([]*db.Utxos, 0)
+		vins   = make([]*db.Utxos, 0)
+		claims = make([]*db.Utxos, 0)
+	)
 	for _, tx := range block.GetMapArray("tx") {
 		txid := tx.GetString("txid")
 		//vout
@@ -77,8 +100,7 @@ func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
 				SpentHeight: -1,
 				ClaimHeight: -1,
 			}
-			utxos = append(utxos, uxto)
-			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
+			vouts = append(vouts, uxto)
 		}
 		//vin
 		for _, vin := range tx.GetMapArray("vin") {
@@ -88,8 +110,7 @@ func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
 				SpentTxid:   txid,
 				IndexN:      int(vin.GetInt64("vout")),
 			}
-			utxos = append(utxos, uxto)
-			addressInfo[fmt.Sprintf("%v-%v", uxto.Address, uxto.Asset)] = struct{}{}
+			vins = append(vins, uxto)
 		}
 
 		//claim
@@ -100,13 +121,14 @@ func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
 				ClaimTxid:   txid,
 				IndexN:      int(claim.GetInt64("vout")),
 			}
-			utxos = append(utxos, uxto)
+			claims = append(claims, uxto)
 		}
 	}
 
 	return map[string]interface{}{
-		"utxos":       utxos,
-		"addressInfo": addressInfo,
+		"vouts":  vouts,
+		"vins":   vins,
+		"claims": claims,
 	}, nil
 }
 
