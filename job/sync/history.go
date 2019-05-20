@@ -171,18 +171,18 @@ func (sh *SyncHistory) Handle(block goutil.Map) (interface{}, error)  {
 }
 
 func (sh *SyncHistory) BlockHeight() (int, int, error) {
-	status, err := db.GetStatus(sh.Name())
+	height, err := getTaskHeightFromDB(sh.Name())
 	if err != nil {
 		log.Error("[SyncHistory] get status err: %v", err)
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
 	}
 
-	assetStatus, err := db.GetStatus(AssetsTask)
+	assetHeight, err := getTaskHeightFromDB(AssetsTask)
 	if err != nil {
 		log.Error("[SyncHistory] get asset status err: %v", err)
 		return 0, 0, fmt.Errorf("get asset status fail(%v)", err)
 	}
-	return status.UpdateHeight, assetStatus.UpdateHeight, nil
+	return height, assetHeight, nil
 }
 
 func (sh *SyncHistory) Block(height int) (goutil.Map, error) {

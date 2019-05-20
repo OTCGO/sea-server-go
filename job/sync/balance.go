@@ -76,26 +76,26 @@ func (sb *SyncBalance) Handle(block goutil.Map) (interface{}, error) {
 }
 
 func (sb *SyncBalance) BlockHeight() (int, int, error) {
-	status, err := db.GetStatus(sb.Name())
+	height, err := getTaskHeightFromDB(sb.Name())
 	if err != nil {
 		log.Error("[SyncBalance] get status err: %v", err)
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
 	}
 
-	assetStatus, err := db.GetStatus(AssetsTask)
+	assetHeight, err := getTaskHeightFromDB(AssetsTask)
 	if err != nil {
 		log.Error("[SyncBalance] get asset status err: %v", err)
 		return 0, 0, fmt.Errorf("get asset status fail(%v)", err)
 	}
 
-	utxoStatus, err := db.GetStatus(UtxoTask)
+	utxoHeight, err := getTaskHeightFromDB(UtxoTask)
 	if err != nil {
 		log.Error("[SyncBalance] get utxo status err: %v", err)
 		return 0, 0, fmt.Errorf("get utxo status fail(%v)", err)
 	}
 
-	min := math.Min(float64(assetStatus.UpdateHeight), float64(utxoStatus.UpdateHeight))
-	return status.UpdateHeight, int(min), nil
+	min := math.Min(float64(assetHeight), float64(utxoHeight))
+	return height, int(min), nil
 }
 
 func (sb *SyncBalance) Block(height int) (goutil.Map, error) {

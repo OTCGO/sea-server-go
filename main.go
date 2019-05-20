@@ -72,12 +72,6 @@ func initTaskAndServer() (err error) {
 		return
 	}
 
-	err = db.InitStatus(sync.BlockTask, sync.AssetsTask,
-		sync.UtxoTask, sync.BalanceTask, sync.HistoryTask)
-	if err != nil {
-		return
-	}
-
 	if config.Conf.OpenSync {
 		node.Init()
 		err = sync.Init()

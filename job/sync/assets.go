@@ -76,18 +76,18 @@ func (sa *SyncAssets) Handle(block goutil.Map) (interface{}, error) {
 }
 
 func (sa *SyncAssets) BlockHeight() (int, int, error) {
-	status, err := db.GetStatus(sa.Name())
+	height, err := getTaskHeightFromDB(sa.Name())
 	if err != nil {
 		log.Error("[SyncAssets] get status err: %v", err)
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
 	}
 
-	blockStatus, err := db.GetStatus(BlockTask)
+	blockHeight, err := getTaskHeightFromDB(BlockTask)
 	if err != nil {
 		log.Error("[SyncAssets] get block status err: %v", err)
 		return 0, 0, fmt.Errorf("get block status fail(%v)", err)
 	}
-	return status.UpdateHeight, blockStatus.UpdateHeight, nil
+	return height, blockHeight, nil
 }
 
 func (sa *SyncAssets) Block(height int) (goutil.Map, error) {

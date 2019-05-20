@@ -16,7 +16,7 @@ func InsertUtxo(t *Utxos) (bool, error) {
 		return false, fmt.Errorf("utxo is nil")
 	}
 
-	return db.InsertOrIgnore(t, &Utxos{Txid: t.Txid, IndexN: t.IndexN})
+	return db.InsertOrIgnore(t, &Utxos{Txid: t.Txid, IndexN: t.IndexN}, true)
 }
 
 func UpdateUtxoVinAndRet(t *Utxos) error {
@@ -105,7 +105,7 @@ func InsertOrIgnoreHistory(h *History) (bool, error) {
 		Txid:      h.Txid,
 		Operation: h.Operation,
 		IndexN:    h.IndexN,
-	})
+	}, false)
 }
 
 func GetUnclaimUtxo(asset, address string, height int) (goutil.Map, error) {

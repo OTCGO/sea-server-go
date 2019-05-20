@@ -64,7 +64,7 @@ func TestMustUpdateStatus(t *testing.T) {
 
 	s2 := Status{Name: "x", UpdateHeight: 2}
 	err = MustUpdateStatus(s2)
-	assert.Error(t, err)
+	assert.NoError(t, err)
 }
 
 func TestFindAllStatus(t *testing.T) {

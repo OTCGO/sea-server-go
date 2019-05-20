@@ -1,10 +1,10 @@
 package db
 
 import (
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
+	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/log"
 	"time"
 )
@@ -54,7 +54,7 @@ func (d *DB) Insert(obj interface{}) (int64, error) {
 	return d.engine.Insert(obj)
 }
 
-func (d *DB) InsertOrIgnore(obj, ignore interface{}) (bool, error) {
+func (d *DB) InsertOrIgnore(obj, ignore interface{}, rmEmpty bool) (bool, error) {
 	exists, err := db.engine.Exist(ignore)
 	if err != nil {
 		return false, err
@@ -63,11 +63,20 @@ func (d *DB) InsertOrIgnore(obj, ignore interface{}) (bool, error) {
 		return false, nil
 	}
 
-	effected, err := db.engine.Insert(obj)
+	var effected int64
+	if rmEmpty {
+		effected, err = d.InsertMap(obj, goutil.Struct2Map(obj))
+	} else {
+		effected, err = db.engine.Insert(obj)
+	}
 	if err != nil {
 		return false, err
 	}
 	return effected == 1, nil
+}
+
+func (d *DB) InsertMap(tableOrBean interface{}, record map[string]interface{}) (int64, error) {
+	return d.engine.Table(tableOrBean).Insert(record)
 }
 
 var db *DB
@@ -95,20 +104,3 @@ const (
 	TableBalance = "balance"
 	TableHistory = "history"
 )
-
-func InitStatus(names ...string) error {
-	for _, name := range names {
-		exists, err := db.engine.Exist(&Status{Name: name})
-		if err != nil {
-			return err
-		}
-		if exists {
-			continue
-		}
-		err = InsertStatus(&Status{Name: name, UpdateHeight: -1})
-		if err != nil {
-			return fmt.Errorf("insert status by name(%v) err: %v", err)
-		}
-	}
-	return nil
-}

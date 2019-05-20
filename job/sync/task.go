@@ -3,12 +3,14 @@ package sync
 import (
 	"fmt"
 	"github.com/OTCGO/sea-server-go/config"
+	"github.com/OTCGO/sea-server-go/db"
 	"github.com/OTCGO/sea-server-go/job/node"
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/container"
 	"github.com/hzxiao/goutil/log"
 	"github.com/hzxiao/goutil/slice"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -207,4 +209,15 @@ func Stats() []goutil.Map {
 		taskStats = append(taskStats, stat)
 	}
 	return taskStats
+}
+
+func getTaskHeightFromDB(task string) (int, error) {
+	status, err := db.GetStatus(task)
+	if err == nil {
+		return status.UpdateHeight, nil
+	}
+	if strings.Contains(err.Error(), "not found") {
+		return -1, nil
+	}
+	return 0, err
 }

@@ -97,8 +97,6 @@ func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
 				Address:     vout.GetString("address"),
 				Height:      height,
 				Status:      1,
-				SpentHeight: -1,
-				ClaimHeight: -1,
 			}
 			vouts = append(vouts, uxto)
 		}
@@ -133,18 +131,18 @@ func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
 }
 
 func (su *SyncUtxo) BlockHeight() (int, int, error) {
-	status, err := db.GetStatus(su.Name())
+	height, err := getTaskHeightFromDB(su.Name())
 	if err != nil {
 		log.Error("[SyncUtxo] get status err: %v", err)
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
 	}
 
-	blockStatus, err := db.GetStatus(BlockTask)
+	blockHeight, err := getTaskHeightFromDB(BlockTask)
 	if err != nil {
 		log.Error("[SyncUtxo] get block status err: %v", err)
 		return 0, 0, fmt.Errorf("get block status fail(%v)", err)
 	}
-	return status.UpdateHeight, blockStatus.UpdateHeight, nil
+	return height, blockHeight, nil
 }
 
 func (su *SyncUtxo) Block(height int) (goutil.Map, error) {

@@ -1,6 +1,11 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/hzxiao/goutil"
+)
+
+const upsertStatusSql = `INSERT INTO status(name,update_height) VALUES (?, ?) ON DUPLICATE KEY UPDATE update_height = ?;`
 
 func InsertStatus(status *Status) error {
 	if status == nil {
@@ -11,7 +16,7 @@ func InsertStatus(status *Status) error {
 		return fmt.Errorf("status.name is empty")
 	}
 
-	_, err := db.engine.Insert(status)
+	_, err := db.InsertMap(status, goutil.Struct2Map(status))
 	if err != nil {
 		return err
 	}
@@ -19,10 +24,7 @@ func InsertStatus(status *Status) error {
 }
 
 func MustUpdateStatus(status Status) error {
-	up, err := db.engine.Cols("update_height").Update(&status, &Status{Name: status.Name})
-	if up == 0 {
-		return fmt.Errorf("not found")
-	}
+	_, err := db.engine.Exec(upsertStatusSql, status.Name, status.UpdateHeight, status.UpdateHeight)
 	return err
 }
 
@@ -52,20 +54,7 @@ func InsertBlock(block *Block) (bool, error) {
 		return false, fmt.Errorf("block is nil")
 	}
 
-	exists, err := db.engine.Exist(&Block{Height: block.Height})
-	if err != nil {
-		return false, err
-	}
-	if exists {
-		return false, nil
-	}
-
-	effected, err := db.engine.Insert(block)
-	if err != nil {
-		return false, err
-	}
-
-	return effected == 1, nil
+	return db.InsertOrIgnore(block, &Block{Height: block.Height}, false)
 }
 
 func GetBlock(height int) (*Block, error) {
@@ -85,18 +74,7 @@ func InsertAssets(assets *Assets) (bool, error) {
 		return false, fmt.Errorf("assets is nil")
 	}
 
-	exists, err := db.engine.Exist(&Assets{Asset: assets.Asset})
-	if err != nil {
-		return false, err
-	}
-	if exists {
-		return false, nil
-	}
-	effected, err := db.engine.Insert(assets)
-	if err != nil {
-		return false, err
-	}
-	return effected == 1, nil
+	return db.InsertOrIgnore(assets, &Assets{Asset: assets.Asset}, false)
 }
 
 func GetAsset(asset string) (*Assets, error) {
