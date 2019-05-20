@@ -49,6 +49,19 @@ func GetStatus(name string) (*Status, error) {
 	return &status, nil
 }
 
+func GetStatusByNames(names ...string) ([]*Status, error) {
+	if len(names) == 0 {
+		return nil, nil
+	}
+
+	var status []*Status
+	err := db.engine.In("name", names).Find(&status)
+	if err != nil {
+		return nil, err
+	}
+	return status, nil
+}
+
 func InsertBlock(block *Block) (bool, error) {
 	if block == nil {
 		return false, fmt.Errorf("block is nil")

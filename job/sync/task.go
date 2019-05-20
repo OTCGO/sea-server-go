@@ -10,7 +10,6 @@ import (
 	"github.com/hzxiao/goutil/log"
 	"github.com/hzxiao/goutil/slice"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 )
@@ -211,13 +210,19 @@ func Stats() []goutil.Map {
 	return taskStats
 }
 
-func getTaskHeightFromDB(task string) (int, error) {
-	status, err := db.GetStatus(task)
-	if err == nil {
-		return status.UpdateHeight, nil
+func getTaskHeightFromDB(tasks ...string) (map[string]int, error) {
+	ss, err := db.GetStatusByNames(tasks...)
+	if err != nil {
+		return nil, err
 	}
-	if strings.Contains(err.Error(), "not found") {
-		return -1, nil
+	res := make(map[string]int)
+	for _, task := range tasks {
+		res[task] = -1
 	}
-	return 0, err
+
+	for _, s := range ss {
+		res[s.Name] = s.UpdateHeight
+	}
+
+	return res, nil
 }

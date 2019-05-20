@@ -170,3 +170,35 @@ func TestInsertAssets(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, ok)
 }
+
+func TestGetStatusByNames(t *testing.T) {
+	deleteAll()
+
+	var err error
+	s1 := &Status{
+		Name:         "utxo",
+		UpdateHeight: 0,
+	}
+	err = InsertStatus(s1)
+	assert.NoError(t, err)
+
+	s2 := &Status{
+		Name:         "assets",
+		UpdateHeight: 0,
+	}
+	err = InsertStatus(s2)
+	assert.NoError(t, err)
+
+	ss, err := GetStatusByNames("utxo", "assets")
+	assert.NoError(t, err)
+	assert.Len(t, ss, 2)
+
+	ss, err = GetStatusByNames("utxo", "assets", "x")
+	assert.NoError(t, err)
+	assert.Len(t, ss, 2)
+
+	ss, err = GetStatusByNames("x")
+	assert.NoError(t, err)
+	assert.Len(t, ss, 0)
+
+}

@@ -131,18 +131,12 @@ func (su *SyncUtxo) Handle(block goutil.Map) (interface{}, error) {
 }
 
 func (su *SyncUtxo) BlockHeight() (int, int, error) {
-	height, err := getTaskHeightFromDB(su.Name())
+	height, err := getTaskHeightFromDB(su.Name(), BlockTask)
 	if err != nil {
-		log.Error("[SyncUtxo] get status err: %v", err)
 		return 0, 0, fmt.Errorf("get status fail(%v)", err)
 	}
 
-	blockHeight, err := getTaskHeightFromDB(BlockTask)
-	if err != nil {
-		log.Error("[SyncUtxo] get block status err: %v", err)
-		return 0, 0, fmt.Errorf("get block status fail(%v)", err)
-	}
-	return height, blockHeight, nil
+	return height[su.Name()], height[BlockTask], nil
 }
 
 func (su *SyncUtxo) Block(height int) (goutil.Map, error) {
