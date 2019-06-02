@@ -186,13 +186,13 @@ func HandleOneHeight(height int, name string) ([]goutil.Map, error) {
 		stat := goutil.Map{"task": task.Name()}
 		block, err := task.Block(height)
 		if err != nil {
-			stat.Set("err", err)
+			stat.Set("err", err.Error())
 			stats = append(stats, stat)
 			continue
 		}
 		res, err := task.Handle(block)
 		if err != nil {
-			stat.Set("err", err)
+			stat.Set("err", err.Error())
 		}
 		stat.Set("data", res)
 		stats = append(stats, stat)
