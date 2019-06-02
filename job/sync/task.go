@@ -26,16 +26,16 @@ const (
 
 // task status
 const (
-	taskStoped int32 = iota
+	taskPause int32 = iota
 	taskRunning
 )
 
 var (
-	tasks     = map[string]SyncTask{}
+	tasks     = map[string]Task{}
 	superNode *node.NodeInfo
 )
 
-type SyncTask interface {
+type Task interface {
 	Name() string
 	Handle(block goutil.Map) (interface{}, error)
 	Sync(block goutil.Map) error
@@ -47,7 +47,7 @@ type SyncTask interface {
 }
 
 func Init() error {
-	tasks := []SyncTask{&SyncBlock{threads: config.Conf.SyncBlockThreads},
+	tasks := []Task{&SyncBlock{threads: config.Conf.SyncBlockThreads},
 		&SyncAssets{}, &SyncUtxo{}, &SyncBalance{}, &SyncHistory{}}
 	if config.Conf.OnlySyncBlock {
 		tasks = tasks[:1]
@@ -60,7 +60,7 @@ func Init() error {
 	return nil
 }
 
-func Register(task ...SyncTask) error {
+func Register(task ...Task) error {
 	for _, t := range task {
 		_, found := tasks[t.Name()]
 		if found {
@@ -77,12 +77,12 @@ func SyncAll() {
 	}
 }
 
-func runTask(task SyncTask) {
+func runTask(task Task) {
 	defer func() {
 		if e := recover(); e != nil {
 			log.Error("[Sync] task(%v) panic by err: %v", e)
 		}
-		task.SetStatus(taskStoped)
+		task.SetStatus(taskPause)
 	}()
 	task.SetStatus(taskRunning)
 	log.Info("[Sync] task(%v) start run", task.Name())
@@ -172,11 +172,11 @@ func HandleOneHeight(height int, name string) ([]goutil.Map, error) {
 	if !slice.ContainsString([]string{"all", AssetsTask, BalanceTask, BlockTask, UtxoTask, HistoryTask}, name) {
 		return nil, fmt.Errorf("unknown task(%v)", name)
 	}
-	tasks := []SyncTask{&SyncBlock{}, &SyncAssets{}, &SyncUtxo{}, &SyncBalance{}, &SyncHistory{}}
+	tasks := []Task{&SyncBlock{}, &SyncAssets{}, &SyncUtxo{}, &SyncBalance{}, &SyncHistory{}}
 	if name != "all" {
 		for _, task := range tasks {
 			if task.Name() == name {
-				tasks = []SyncTask{task}
+				tasks = []Task{task}
 				break
 			}
 		}
