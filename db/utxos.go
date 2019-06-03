@@ -79,6 +79,11 @@ func ListUptByHeight(height int) ([]*Upt, error) {
 	return upts, nil
 }
 
+func DeleteUpt(start, end int) error {
+	_, err := db.engine.Table(TableUpt).Exec("DELETE FROM upt WHERE update_height >= ? AND update_height < ?;", start, end)
+	return err
+}
+
 func InsertOrUpdateBalance(b *Balance) (bool, error) {
 	if b == nil {
 		return false, fmt.Errorf("balance is nil")

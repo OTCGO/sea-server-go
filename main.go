@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/OTCGO/sea-server-go/config"
 	"github.com/OTCGO/sea-server-go/db"
+	"github.com/OTCGO/sea-server-go/job/clean"
 	"github.com/OTCGO/sea-server-go/job/node"
 	"github.com/OTCGO/sea-server-go/job/sync"
 	"github.com/OTCGO/sea-server-go/server"
@@ -79,6 +80,7 @@ func initTaskAndServer() (err error) {
 			return
 		}
 		sync.SyncAll()
+		clean.StartClean()
 	}
 
 	server.Init()

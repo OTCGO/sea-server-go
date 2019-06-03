@@ -154,6 +154,29 @@ func TestGetBlock(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestCleanBlockRawData(t *testing.T) {
+	deleteAll()
+
+	var err error
+	b1 := &Block{
+		Height: 1,
+		SysFee: 2,
+		Raw: goutil.Map{
+			"index": "0",
+		},
+	}
+	ok, err := InsertBlock(b1)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+
+	err = CleanBlockRawData(0, 2)
+	assert.NoError(t, err)
+
+	b, err := GetBlock(b1.Height)
+	assert.NoError(t, err)
+	assert.Nil(t, b.Raw)
+}
+
 func TestInsertAssets(t *testing.T) {
 	deleteAll()
 

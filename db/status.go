@@ -82,6 +82,11 @@ func GetBlock(height int) (*Block, error) {
 	return &block, nil
 }
 
+func CleanBlockRawData(start, end int) error {
+	_, err := db.engine.Table(TableBlock).Exec("UPDATE block SET raw = NULL WHERE height >= ? AND height < ?;", start, end)
+	return err
+}
+
 func InsertAssets(assets *Assets) (bool, error) {
 	if assets == nil {
 		return false, fmt.Errorf("assets is nil")
