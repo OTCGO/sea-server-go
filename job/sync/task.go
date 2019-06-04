@@ -5,6 +5,7 @@ import (
 	"github.com/OTCGO/sea-server-go/config"
 	"github.com/OTCGO/sea-server-go/db"
 	"github.com/OTCGO/sea-server-go/job/node"
+	"github.com/OTCGO/sea-server-go/pkg/neo"
 	"github.com/hzxiao/goutil"
 	"github.com/hzxiao/goutil/container"
 	"github.com/hzxiao/goutil/log"
@@ -225,4 +226,22 @@ func getTaskHeightFromDB(tasks ...string) (map[string]int, error) {
 	}
 
 	return res, nil
+}
+
+//getBlock get block from db first. otherwise rpc get block
+func getBlock(height int) (goutil.Map, error) {
+	b, err := db.GetBlock(height)
+	if err != nil {
+		return nil, err
+	}
+	if len(b.Raw) > 0 {
+		return b.Raw, nil
+	}
+
+	var block goutil.Map
+	err = neo.Rpc(superNode.FastestNode.Value(), neo.MethodGetBlock, []int{height, 1}, &block)
+	if err != nil {
+		return nil, err
+	}
+	return block, nil
 }

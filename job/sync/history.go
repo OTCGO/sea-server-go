@@ -180,11 +180,7 @@ func (sh *SyncHistory) BlockHeight() (int, int, error) {
 }
 
 func (sh *SyncHistory) Block(height int) (goutil.Map, error) {
-	b, err := db.GetBlock(height)
-	if err != nil {
-		return nil, err
-	}
-	return b.Raw, nil
+	return getBlock(height)
 }
 
 func (sh *SyncHistory) Threads() int {

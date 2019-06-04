@@ -140,11 +140,7 @@ func (su *SyncUtxo) BlockHeight() (int, int, error) {
 }
 
 func (su *SyncUtxo) Block(height int) (goutil.Map, error) {
-	b, err := db.GetBlock(height)
-	if err != nil {
-		return nil, err
-	}
-	return b.Raw, nil
+	return getBlock(height)
 }
 
 func (su *SyncUtxo) Threads() int {

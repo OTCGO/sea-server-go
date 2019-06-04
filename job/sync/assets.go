@@ -85,11 +85,7 @@ func (sa *SyncAssets) BlockHeight() (int, int, error) {
 }
 
 func (sa *SyncAssets) Block(height int) (goutil.Map, error) {
-	b, err := db.GetBlock(height)
-	if err != nil {
-		return nil, err
-	}
-	return b.Raw, nil
+	return getBlock(height)
 }
 
 func (sa *SyncAssets) Threads() int {
